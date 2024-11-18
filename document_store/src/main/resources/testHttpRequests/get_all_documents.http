@@ -1,0 +1,2 @@
+//run this after upload document to see the list of the documents metadata
+GET http://localhost:8080/documents/

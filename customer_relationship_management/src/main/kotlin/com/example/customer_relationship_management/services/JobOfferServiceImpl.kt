@@ -1,0 +1,233 @@
+package com.example.customer_relationship_management.services
+
+
+
+import com.example.customer_relationship_management.controllers.InvalidStateException
+import com.example.customer_relationship_management.dtos.JobOfferDTO
+import com.example.customer_relationship_management.dtos.toDto
+import com.example.customer_relationship_management.entities.Customer
+import com.example.customer_relationship_management.entities.JobOffer
+import com.example.customer_relationship_management.entities.Professional
+import com.example.customer_relationship_management.entities.Skill
+import com.example.customer_relationship_management.repositories.JobOfferRepository
+import jakarta.persistence.EntityManager
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.CriteriaQuery
+import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Root
+
+import org.springframework.stereotype.Service
+
+@Service
+class JobOfferServiceImpl (private val jobOfferRepository: JobOfferRepository, private val entityManager: EntityManager) : JobOfferService {
+    override fun createJobOffer(
+        description: String,
+        state: String,
+        notes: String?,
+        duration: Int,
+        value: Double?,
+        customer: Customer,
+        professional: Professional?,
+        skills:List<Skill>?
+    ): JobOffer {
+        val jb =JobOffer( description, state, notes, duration, value, customer, professional )
+        skills?.forEach{skill ->
+
+            jb.addSkill(skill)
+        }
+        return jobOfferRepository.save(jb)
+    }
+
+    override fun findById(id: Long): JobOffer {
+        return jobOfferRepository.getReferenceById(id)
+    }
+
+    override fun listPaginated(offset: Int, limit: Int, state: String, customer: Long, professional: Long): List<JobOfferDTO> {
+        val criteriaBuilder: CriteriaBuilder = entityManager.criteriaBuilder
+        val criteriaQuery: CriteriaQuery<JobOffer> = criteriaBuilder.createQuery(JobOffer::class.java)
+        val root: Root<JobOffer> = criteriaQuery.from(JobOffer::class.java)
+
+        val predicates = mutableListOf<Predicate>()
+
+        if (customer != 0L) {
+            predicates.add(criteriaBuilder.equal(root.get<Customer>("customer").get<Long>("id"), customer))
+        }
+        if (professional != 0L) {
+            predicates.add(criteriaBuilder.equal(root.get<Professional>("professional").get<Long>("id"), professional))
+        }
+        if (state.isNotBlank()) {
+            val stateLowerCase = state.lowercase()
+            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get<String>("state")), "%$stateLowerCase%"))
+        }
+
+        val finalPredicate = criteriaBuilder.and(*predicates.toTypedArray())
+        criteriaQuery.where(finalPredicate)
+        val query = entityManager.createQuery(criteriaQuery)
+        query.maxResults = limit
+        query.firstResult = offset
+
+        return query.resultList.map { it.toDto() }
+    }
+
+
+    override fun listOpenPaginated(offset: Int, limit: Int, customerId: Long, statesNotAllowed : List<String>): List<JobOfferDTO> {
+        val criteriaBuilder: CriteriaBuilder = entityManager.criteriaBuilder
+        val criteriaQuery: CriteriaQuery<JobOffer> = criteriaBuilder.createQuery(JobOffer::class.java)
+        val root: Root<JobOffer> = criteriaQuery.from(JobOffer::class.java)
+
+        val predicates = mutableListOf<Predicate>()
+
+        predicates.add(criteriaBuilder.equal(root.get<Customer>("customer").get<Long>("id"), customerId))
+
+        statesNotAllowed.forEach { state ->
+            predicates.add(criteriaBuilder.notEqual(criteriaBuilder.lower(root.get<String>("state")),state))
+        }
+
+        val finalPredicate = criteriaBuilder.and(*predicates.toTypedArray())
+        criteriaQuery.where(finalPredicate)
+        val query = entityManager.createQuery(criteriaQuery)
+        query.maxResults = limit
+        query.firstResult = offset
+
+        return query.resultList.map { it.toDto() }
+    }
+
+
+    override fun listAcceptedPaginated(offset: Int, limit: Int, professionalId: Long, statesNotAllowed: List<String>): List<JobOfferDTO> {
+        val criteriaBuilder: CriteriaBuilder = entityManager.criteriaBuilder
+        val criteriaQuery: CriteriaQuery<JobOffer> = criteriaBuilder.createQuery(JobOffer::class.java)
+        val root: Root<JobOffer> = criteriaQuery.from(JobOffer::class.java)
+
+        val predicates = mutableListOf<Predicate>()
+
+        predicates.add(criteriaBuilder.equal(root.get<Professional>("professional").get<Long>("id"), professionalId))
+
+        statesNotAllowed.forEach { state ->
+            predicates.add(criteriaBuilder.notEqual(criteriaBuilder.lower(root.get<String>("state")),state))
+        }
+
+        val finalPredicate = criteriaBuilder.and(*predicates.toTypedArray())
+        criteriaQuery.where(finalPredicate)
+        val query = entityManager.createQuery(criteriaQuery)
+        query.maxResults = limit
+        query.firstResult = offset
+
+        return query.resultList.map { it.toDto() }
+    }
+
+    override fun listAbortedPaginated(offset: Int, limit: Int, state:String, customer: Long, professional: Long): List<JobOfferDTO> {
+        val criteriaBuilder: CriteriaBuilder = entityManager.criteriaBuilder
+        val criteriaQuery: CriteriaQuery<JobOffer> = criteriaBuilder.createQuery(JobOffer::class.java)
+        val root: Root<JobOffer> = criteriaQuery.from(JobOffer::class.java)
+
+        val predicates = mutableListOf<Predicate>()
+
+        if (customer != 0L) {
+            predicates.add(criteriaBuilder.equal(root.get<Customer>("customer").get<Long>("id"), customer))
+        }
+        if (professional != 0L) {
+            predicates.add(criteriaBuilder.equal(root.get<Professional>("professional").get<Long>("id"), professional))
+        }
+
+        predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get<String>("state")),state))
+        val finalPredicate = criteriaBuilder.and(*predicates.toTypedArray())
+        criteriaQuery.where(finalPredicate)
+        val query = entityManager.createQuery(criteriaQuery)
+        query.maxResults = limit
+        query.firstResult = offset
+
+        return query.resultList.map { it.toDto() }
+    }
+
+
+    override fun updateJobOffer(
+        description: String,
+        notes: String?,
+        duration: Int,
+        jobOffer: JobOffer
+    ): JobOffer {
+        jobOffer.description = if (description != "") description else jobOffer.description
+        jobOffer.notes = if (notes != "") notes else jobOffer.notes
+        jobOffer.duration = if (duration > 0) duration else jobOffer.duration
+        return jobOfferRepository.save(jobOffer)
+    }
+
+    override fun updateJobOfferStatus(state: String, notes: String?,professional: Professional?, jobOffer: JobOffer): JobOffer {
+        when(state.lowercase()){
+            "selection phase" -> if(jobOffer.state.lowercase()=="created" || jobOffer.state.lowercase()=="candidate proposal" || jobOffer.state.lowercase()=="consolidated" || jobOffer.state.lowercase()=="done"){
+                jobOffer.goToSelectionPhase(notes?:"")
+                if(jobOffer.professional!=null){
+                    jobOffer.value = null
+                    jobOffer.professional!!.state="Unemployed"
+                    jobOffer.professional!!.removeJob(jobOffer)
+                }
+
+            }else{
+                throw InvalidStateException("The job offer can't reach this status(selection phase) from his actual state(${jobOffer.state})")
+            }
+            "candidate proposal" -> if(jobOffer.state.lowercase()=="selection phase"){
+                jobOffer.goToCandidateProposal(notes?:"")
+
+            }else{
+                throw InvalidStateException("The job offer can't reach this status(candidate proposal) from his actual state(${jobOffer.state})")
+            }
+            "consolidated" -> if(jobOffer.state.lowercase()=="candidate proposal"){
+                jobOffer.goToConsolidated(notes?:"")
+                if (professional != null) {
+                    if(professional.state.lowercase()=="unemployed"){
+                        professional.state="Employed"
+                        professional.addJob(jobOffer)
+                        jobOffer.value=professional.dailyRate*jobOffer.duration*1.1
+                    }else{
+                        throw InvalidStateException("This professional is already cannot be employed")
+                    }
+
+                }
+
+
+            }else{
+                throw InvalidStateException("The job offer can't reach this status(consolidated) from his actual state(${jobOffer.state})")
+            }
+            "done" -> if(jobOffer.state.lowercase()=="consolidated"){
+                jobOffer.goToDone(notes?:"")
+
+            }else{
+                throw InvalidStateException("The job offer can't reach this status(done) from his actual state(${jobOffer.state})")
+            }
+            "aborted" -> if(jobOffer.state.lowercase()!="done"){
+                jobOffer.goToAborted(notes?:"")
+                if(jobOffer.professional!=null){
+                    jobOffer.professional!!.state="Unemployed"
+                }
+
+            }else{
+                throw InvalidStateException("The job offer can't reach this status(aborted) from his actual state(${jobOffer.state})")
+            }
+            else -> throw InvalidStateException("Invalid state with value: $state")
+        }
+
+        return jobOfferRepository.save(jobOffer)
+    }
+
+    override fun deleteJobOffer(jobOffer: JobOffer) : JobOffer{
+        val skillsToRemove = ArrayList(jobOffer.skills)
+        skillsToRemove.forEach{
+            jobOffer.removeSkill(it)
+        }
+        jobOffer.professional?.removeJob(jobOffer)
+        jobOffer.customer?.removeJob(jobOffer)
+        jobOfferRepository.delete(jobOffer)
+        return jobOffer
+    }
+
+    override fun addJobOfferSkill(jobOffer: JobOffer, newSkill: Skill): JobOffer {
+        jobOffer.addSkill(newSkill)
+        return jobOfferRepository.save(jobOffer)
+    }
+
+    override fun removeJobOfferSkill(jobOffer: JobOffer, skill: Skill): JobOffer {
+        jobOffer.removeSkill(skill)
+        return jobOfferRepository.save(jobOffer)
+    }
+
+}

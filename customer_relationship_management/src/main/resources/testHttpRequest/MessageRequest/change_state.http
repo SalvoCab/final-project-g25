@@ -1,0 +1,8 @@
+POST http://localhost:8050/messages/1
+Content-Type: application/json
+
+{
+  "state": "Read",
+  "comment": "the message has been read"
+
+}

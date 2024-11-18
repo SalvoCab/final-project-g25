@@ -1,0 +1,11 @@
+POST http://localhost:8080/skills
+
+Rust
+###
+POST http://localhost:8080/skills
+
+Python
+###
+POST http://localhost:8080/skills
+
+Java

@@ -1,0 +1,76 @@
+//trys to print the document list
+GET http://localhost:8080/documents/
+
+###
+//uploads a pdf file
+POST /documents/ HTTP/1.1
+Host: localhost:8080
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="Lab1.pdf"
+Content-Type: application/pdf
+
+< assets/Lab1.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+//uploads a png file
+POST /documents/ HTTP/1.1
+Host: localhost:8080
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gWa
+
+------WebKitFormBoundary7MA4YWxkTrZu0gWa
+Content-Disposition: form-data; name="file"; filename="spring.png"
+Content-Type: image/png
+
+< assets/Spring.png
+------WebKitFormBoundary7MA4YWxkTrZu0gWa--
+
+###
+//print all documents
+GET http://localhost:8080/documents/
+
+###
+//print first document details
+GET http://localhost:8080/documents/1
+
+
+###
+//prind first document content
+GET http://localhost:8080/documents/1/data/
+
+###
+//updates first document
+PUT /documents/1 HTTP/1.1
+Host: localhost:8080
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="Wa00-CourseIntro.pdf"
+Content-Type: application/pdf
+
+< assets/Wa00-CourseIntro.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+//print first document details
+GET http://localhost:8080/documents/1
+
+
+###
+//print first document content
+GET http://localhost:8080/documents/1/data/
+
+
+###
+//print second document content
+GET http://localhost:8080/documents/2/data/
+
+###
+//delete second document
+DELETE http://localhost:8080/documents/2
+
+###
+//print the document list
+GET http://localhost:8080/documents/

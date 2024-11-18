@@ -1,0 +1,5 @@
+POST http://localhost:8080/contacts/1/address
+Host: localhost:8080
+
+//just add address in below format
+myaddress

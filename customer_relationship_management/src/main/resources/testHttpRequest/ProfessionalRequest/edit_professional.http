@@ -1,0 +1,8 @@
+PUT http://localhost:8080/professionals/1
+Content-Type: application/json
+
+{
+  "location": "San Marino",
+  "state": "employed",
+  "dailyRate": 11.50
+}

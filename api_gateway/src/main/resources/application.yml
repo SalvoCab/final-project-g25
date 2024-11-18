@@ -1,0 +1,57 @@
+
+spring:
+  application:
+    name: api_gateway
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:9095/realms/kc1
+        registration:
+          kc1client:
+            provider: keycloak
+            client-id: kc1client
+            client-secret: A4PGV1WAVvB528I2rCXsY00Bv2JMAERW
+            scope:
+              - openid
+              - offline_access
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:8080/login/oauth2/code/kc1client
+  cloud:
+    gateway:
+      mvc:
+        http-client:
+          type: autodetect
+        routes:
+          - id: crm
+            uri: http://localhost:8050
+            predicates:
+              - Path=/crm/**
+            filters:
+              - StripPrefix=1
+              - TokenRelay
+          - id: cm
+            uri: http://localhost:8051
+            predicates:
+              - Path=/cm/**
+            filters:
+              - StripPrefix=1
+              - TokenRelay
+          - id: ds
+            uri: http://localhost:8052
+            predicates:
+              - Path=/ds/**
+            filters:
+              - StripPrefix=1
+              - TokenRelay
+          - id: ui
+            uri: http://localhost:5173
+            predicates:
+              - Path=/ui/**
+          - id: home
+            uri: http://localhost:8080
+            predicates:
+              - Path=/
+            filters:
+              - RedirectTo=301,http://localhost:8080/ui

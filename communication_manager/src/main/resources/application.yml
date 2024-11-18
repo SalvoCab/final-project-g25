@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: communication_manager
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  mvc:
+    problemdetails:
+      enabled: true
+  datasource:
+    url: jdbc:postgresql://postgres:5432/mydatabase
+    username: myuser
+    password: secret
+    driver-class-name: org.postgresql.Driver
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9095/realms/kc1
+
+gmail-account:
+  application_name: WebClient
+
+gmail:
+  client-id: 402616155511-p9kgi0ulcolgve51dminjamr06mcgnqv.apps.googleusercontent.com
+  client-secret: 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
+  refresh-token: 1//048cn2IQmyAbkCgYIARAAGAQSNwF-L9IruNsBG5QyXkLCX3dF5FqWd9zHMrJM2jW-RHhvSFlXIoVOubvv-YeN6HMBweSEZUM0HkU
+
+camel:
+  component:
+    google-mail-stream:
+      application-name: ${gmail-account.application_name}
+      client-id: ${gmail.client-id}
+      client-secret: ${gmail.client-secret}
+      refresh-token: ${gmail.refresh-token}
+    google-mail:
+      application-name: ${gmail-account.application_name}
+      client-id: ${gmail.client-id}
+      client-secret: ${gmail.client-secret}
+      refresh-token: ${gmail.refresh-token}
+server:
+  port: 8051

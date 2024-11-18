@@ -1,0 +1,17 @@
+POST http://localhost:8080/joboffers/1
+Content-Type: application/json
+
+{
+  "state": "Selection phase",
+  "notes": "this job offer is now in selection phase",
+  "professionalId": 1
+}
+
+###
+// STATES
+// Created
+// Selection phase
+// Candidate proposal
+// Consolidated
+// Done
+// Aborted

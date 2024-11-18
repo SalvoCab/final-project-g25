@@ -1,0 +1,150 @@
+{
+  "realm": "kc1",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "manager",
+        "description": "Manager role"
+      },
+      {
+        "name": "operator",
+        "description": "Operator role"
+      },
+      {
+        "name": "guest",
+        "description": "Guest role"
+      },
+      {
+        "name": "offline_access",
+        "description": "Offline access role"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "kc1client",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "A4PGV1WAVvB528I2rCXsY00Bv2JMAERW",
+      "redirectUris": [
+        "http://localhost:8080/login/oauth2/code/kc1client"
+      ],
+      "protocol": "openid-connect",
+      "attributes": {
+        "client.offline.session.idle.timeout": "2592000",
+        "post.logout.redirect.uris": "http://localhost:8080/",
+        "client.offline.session.max.lifespan": "5184000"
+      },
+      "defaultClientScopes": [
+        "openid",
+        "profile",
+        "email",
+        "roles",
+        "offline_access"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "g.orani",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Giovanni",
+      "lastName": "Orani",
+      "email": "g.orani@gmail.com",
+      "createdTimestamp": 1717866400000,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "manager",
+        "offline_access"
+      ],
+      "attributes": {
+        "preferred_username": "g.orani",
+        "phone_number": "123456789",
+        "gender": "male"
+      }
+    },
+    {
+      "username": "s.cabras",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Salvatore",
+      "lastName": "Cabras",
+      "email": "s.cabras@gmail.com",
+      "createdTimestamp": 1717866400000,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "manager",
+        "offline_access"
+      ],
+      "attributes": {
+        "preferred_username": "s.cabras",
+        "phone_number": "987654321",
+        "gender": "male"
+      }
+    },
+    {
+      "username": "operator",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Operator",
+      "lastName": "User",
+      "email": "operator@example.com",
+      "createdTimestamp": 1717866400000,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "operator",
+        "offline_access"
+      ],
+      "attributes": {
+        "preferred_username": "operator",
+        "phone_number": "5551234",
+        "gender": "female"
+      }
+    },
+    {
+      "username": "guest",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Guest",
+      "lastName": "User",
+      "email": "guest@example.com",
+      "createdTimestamp": 1717866400000,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "guest",
+        "offline_access"
+      ],
+      "attributes": {
+        "preferred_username": "guest",
+        "phone_number": "999000111",
+        "gender": "unknown"
+      }
+    }
+  ]
+}

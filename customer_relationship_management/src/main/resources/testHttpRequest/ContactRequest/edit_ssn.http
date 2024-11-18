@@ -1,0 +1,4 @@
+PUT http://localhost:8080/contacts/1/ssn
+
+523-123-432
+

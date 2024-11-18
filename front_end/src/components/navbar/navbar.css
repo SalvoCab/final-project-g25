@@ -1,0 +1,25 @@
+/* Navbar.css */
+.navbar {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    box-sizing: border-box;
+}
+
+.badge{
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+.navbar-title {
+    font-size: 1.5em;
+}
+
+.navbar-auth {
+    display: flex;
+    align-items: center;
+}

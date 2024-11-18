@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: customer_relationship_management
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  mvc:
+    problemdetails:
+      enabled: true
+  datasource:
+    url: jdbc:postgresql://postgres:5432/mydatabase
+    username: myuser
+    password: secret
+    driver-class-name: org.postgresql.Driver
+  kafka:
+    producer:
+      bootstrap-servers: 127.0.0.1:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      client-id: producer
+    streams:
+      application-id: application-id
+      properties:
+        default:
+          key:
+            serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+          value:
+            serde: org.springframework.kafka.support.serializer.JsonSerde
+        spring.json.trusted.packages: "*"
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9095/realms/kc1
+server:
+  port: 8050
+
+# spring.kafka.consumer:
+#   bootstrap-servers: 127.0.0.1:9092
+#   group-id: consumer
+#   auto-offset-reset: earliest
+#   key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#   value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+eventTopic: events

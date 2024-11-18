@@ -1,0 +1,6 @@
+//run after al least an upload document to test the correct response
+GET http://localhost:8080/contacts/2
+
+###
+//run after al least an upload document to test the DocumentNotFoundException
+GET http://localhost:8080/contacts/999

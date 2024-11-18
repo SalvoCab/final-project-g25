@@ -1,0 +1,9 @@
+POST http://localhost:8080/professionals/1
+Content-Type: application/json
+
+{
+  "location": "Italy",
+  "state": "unemployed",
+  "dailyRate": 10.50,
+  "skills": [1, 2, 3]
+}

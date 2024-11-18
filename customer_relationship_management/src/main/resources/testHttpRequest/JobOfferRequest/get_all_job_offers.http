@@ -1,0 +1,5 @@
+GET http://localhost:8080/joboffers/
+
+###
+//filtering by state, customer id and professional id (the output will be the and of each parameter)
+GET http://localhost:8080/joboffers/?page=0&limit=20&state=created&customer=&professional=

@@ -1,0 +1,40 @@
+
+
+PUT /documents/2 HTTP/1.1
+Host: localhost:8080
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="Lab1.pdf"
+Content-Type: application/pdf
+
+< assets/Lab1.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+//use this in a file that is not lab1.pdf with lab1.pdf altredy exists but with another id
+//this throws the DuplicatyeDocumentException
+PUT /documents/3 HTTP/1.1
+Host: localhost:8080
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="Lab1.pdf"
+Content-Type: application/pdf
+
+< assets/Lab1.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+
+###
+//to test DocumentNotFoundException
+PUT /documents/9999 HTTP/1.1
+Host: localhost:8080
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="Lab1.pdf"
+Content-Type: application/pdf
+
+< assets/Lab1.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--

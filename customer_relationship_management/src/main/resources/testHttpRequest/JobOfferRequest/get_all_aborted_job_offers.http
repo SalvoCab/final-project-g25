@@ -1,0 +1,1 @@
+GET http://localhost:8080/joboffers/aborted?page=0&limit=20&customer=&professional=

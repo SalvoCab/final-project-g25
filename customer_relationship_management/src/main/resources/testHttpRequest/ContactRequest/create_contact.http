@@ -1,0 +1,22 @@
+POST /contacts/ HTTP/1.1
+Host: localhost:8050
+Content-Type: application/json
+
+{
+  "name": "John",
+  "surname": "Doe",
+  "category": "unknown",
+  "ssnCode": "123-123-324",
+  "emails": [
+    "email134342423@example.com",
+    "email234324222@example.com"
+  ],
+  "addresses": [
+    "Address_124342243",
+    "Address_24224423"
+  ],
+  "phoneNumbers": [
+    "+1234567890",
+    "+0987654321"
+  ]
+}

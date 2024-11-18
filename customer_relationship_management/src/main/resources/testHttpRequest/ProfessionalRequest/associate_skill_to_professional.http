@@ -1,0 +1,3 @@
+POST http://localhost:8080/professionals/1/skill
+
+c++

@@ -1,0 +1,5 @@
+POST http://localhost:8080/contacts/1/email
+Host: localhost:8080
+
+//just send new email in the below format
+newemailmario@example.com

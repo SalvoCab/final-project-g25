@@ -1,0 +1,7 @@
+//run after al least an upload document to test the correct deletion response
+DELETE http://localhost:8080/documents/1
+
+
+###
+//run after al least an upload document to test the DocumentNotFoundException
+DELETE http://localhost:8080/documents/9999

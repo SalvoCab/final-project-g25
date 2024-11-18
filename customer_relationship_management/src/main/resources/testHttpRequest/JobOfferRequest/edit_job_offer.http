@@ -1,0 +1,8 @@
+PUT http://localhost:8080/joboffers/1
+Content-Type: application/json
+
+{
+  "description": "description",
+  "duration": 200,
+  "notes": "Some notes"
+}

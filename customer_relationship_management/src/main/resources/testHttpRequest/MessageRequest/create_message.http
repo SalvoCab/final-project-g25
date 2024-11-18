@@ -1,0 +1,11 @@
+POST http://localhost:8080/messages/
+Content-Type: application/json
+
+{
+  "sender": "alice@example.com",
+  "subject": "Test1",
+  "body": "This is a test message",
+  "channel": "email",
+  "priority": 1
+}
+

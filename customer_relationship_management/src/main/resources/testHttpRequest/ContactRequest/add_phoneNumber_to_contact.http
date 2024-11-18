@@ -1,0 +1,5 @@
+POST http://localhost:8080/contacts/1/phoneNumber
+Host: localhost:8080
+
+//just send new phone number in the below format
+3568891925

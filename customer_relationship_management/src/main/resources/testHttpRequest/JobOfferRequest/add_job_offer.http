@@ -1,0 +1,9 @@
+POST http://localhost:8080/joboffers/1/customer
+Content-Type: application/json
+
+{
+  "description": "description",
+  "duration": 100,
+  "notes": "Some notes",
+  "skills": [1,2,3]
+}

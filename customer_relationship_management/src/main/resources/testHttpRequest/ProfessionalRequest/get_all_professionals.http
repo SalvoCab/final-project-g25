@@ -1,0 +1,5 @@
+GET http://localhost:8080/professionals/
+
+###
+//filtering by location,state and skills (the output will be the and of each parameter)
+GET http://localhost:8080/professionals/?page=0&limit=20&state=unemp&location=Italy&skills=1,2

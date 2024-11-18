@@ -1,0 +1,10 @@
+POST http://localhost:8051/api/emails/
+Content-Type: application/json
+
+{
+  "recipient": "salvocabras99@gmail.com",
+  "subject": "Test Subject",
+  "body": "This is a test email."
+}
+
+
