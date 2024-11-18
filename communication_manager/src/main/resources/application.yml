@@ -25,7 +25,7 @@ gmail-account:
 gmail:
   client-id: 402616155511-p9kgi0ulcolgve51dminjamr06mcgnqv.apps.googleusercontent.com
   client-secret: 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
-  refresh-token: 1//048cn2IQmyAbkCgYIARAAGAQSNwF-L9IruNsBG5QyXkLCX3dF5FqWd9zHMrJM2jW-RHhvSFlXIoVOubvv-YeN6HMBweSEZUM0HkU
+  refresh-token: 1//04Iel4nzK-85PCgYIARAAGAQSNwF-L9IrIi54wS10IM69F6Auu_qxeqFIYXqZer9hRHD0FsduCRdJt1SezGRCWnCQMoVps4UX9Cg
 
 camel:
   component:
