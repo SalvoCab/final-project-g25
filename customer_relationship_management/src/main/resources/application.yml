@@ -13,21 +13,10 @@ spring:
     username: myuser
     password: secret
     driver-class-name: org.postgresql.Driver
-  kafka:
-    producer:
-      bootstrap-servers: 127.0.0.1:9092
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-      client-id: producer
-    streams:
-      application-id: application-id
-      properties:
-        default:
-          key:
-            serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-          value:
-            serde: org.springframework.kafka.support.serializer.JsonSerde
-        spring.json.trusted.packages: "*"
+  kafka.consumer:
+     bootstrap-servers: 127.0.0.1:9092
+     group-id: consumer
+     auto-offset-reset: earliest
   security:
     oauth2:
       resourceserver:
@@ -36,11 +25,5 @@ spring:
 server:
   port: 8050
 
-# spring.kafka.consumer:
-#   bootstrap-servers: 127.0.0.1:9092
-#   group-id: consumer
-#   auto-offset-reset: earliest
-#   key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-#   value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
 eventTopic: events

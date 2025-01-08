@@ -4,89 +4,225 @@ services:
     ports:
       - '9095:8080'
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: password
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: password
+      PROXY_ADDRESS_FORWARDING: true
+      KC_HOSTNAME: http://localhost:9095
+      KEYCLOAK_FRONTEND_URL: http://localhost:9095
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: true
+      KC_HEALTH_ENABLED: true
     volumes:
       - ./kc1-realm.json:/opt/keycloak/data/import/kc1-realm.json
     command:
       - start-dev
       - --import-realm
-  postgres:
+    networks:
+      - kfk-net
+      - keycloak
+    healthcheck:
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'" ]
+      start_period: 60s
+      interval: 5s
+      timeout: 1s
+      retries: 10
+
+#  postgres:
+#    image: 'postgres:latest'
+#    environment:
+#      - POSTGRES_DB=mydatabase
+#      - POSTGRES_PASSWORD=secret
+#      - POSTGRES_USER=myuser
+#    ports:
+#      - '5432:5432'
+#    networks:
+#      - kfk-net
+#    command:
+#      - "postgres"
+#      - "-c"
+#      - "shared_preload_libraries=pgoutput"
+#      - "-c"
+#      - "wal_level=logical"
+#    volumes:
+#      - 'postgres_data:/var/lib/postgresql/data'
+#    networks:
+#      - kfk-net
+#      - keycloak
+
+  crm_app:
+    build: ./customer_relationship_management
+    image: 'customer_relationship_management:0.0.1-SNAPSHOT'
+    ports:
+      - '8050:8050'
+    depends_on:
+      crm_postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - crm_app
+      - ds_app
+      - kfk-net
+      - keycloak
+    healthcheck:
+      test: wget --spider -q http://localhost:8082/actuator/health || exit 1
+      start_period: 5s
+      interval: 5s
+      timeout: 1s
+      retries: 10
+
+  crm_postgres:
+    image: 'postgres:latest'
+    ports:
+      - '5432:5432'
+    environment:
+          - 'POSTGRES_DB=mydatabase'
+          - 'POSTGRES_PASSWORD=secret'
+          - 'POSTGRES_USER=myuser'
+    volumes:
+      - crm_data:/var/lib/postgresql/data
+    networks:
+      - crm_app
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "mydatabase"]
+      start_period: 1s
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api_gateway_app:
+    build: ./api_gateway
+    image: 'api_gateway:0.0.1-SNAPSHOT'
+    ports:
+      - '8053:8053'
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    network_mode: host
+    healthcheck:
+      test: wget --spider -q http://localhost:8080/ || exit 1
+      start_period: 5s
+      interval: 5s
+      timeout: 1s
+      retries: 10
+
+  front_end_app:
+    build: ./front_end
+    image: 'front_end:0.0.1-SNAPSHOT'
+    ports:
+      - '5173:5173'
+    healthcheck:
+      test: curl -f http://localhost:5173 || exit 1
+      start_period: 1s
+      interval: 5s
+      timeout: 1s
+      retries: 10
+
+  cm_app:
+    build: ./communication_manager
+    image: 'communication_manager:0.0.1-SNAPSHOT'
+    networks:
+      - cm_app
+      - keycloak
+      - kfk-net
+    ports:
+      - '8082:8082'
+    depends_on:
+      cm_postgres:
+        condition: service_healthy
+
+  cm_postgres:
     image: 'postgres:latest'
     environment:
       - 'POSTGRES_DB=mydatabase'
       - 'POSTGRES_PASSWORD=secret'
       - 'POSTGRES_USER=myuser'
-    ports:
-      - '5432:5432'
-#    networks:
-#      - kfk-net
-    command:
-      - "postgres"
-      - "-c"
-      - "shared_preload_libraries=pgoutput"
-      - "-c"
-      - "wal_level=logical"
     volumes:
-      - 'postgres_data:/var/lib/postgresql/data'
-#  crm_app:
-#    image: 'customer_relationship_management:0.0.1-SNAPSHOT'
-#    ports:
-#      - '8050:8050'
-#    depends_on:
-#      - postgres
-##  api_gateway_app:
-##    image: 'api_gateway:0.0.1-SNAPSHOT'
-##    ports:
-##      - '8053:8053'
-##    depends_on:
-##      - postgres
-#  cm_app:
-#    image: 'communication_manager:0.0.1-SNAPSHOT'
-#    ports:
-#      - '8051:8051'
-#    depends_on:
-#      - postgres
-#  ds_app:
-#    image: 'document_store:0.0.1-SNAPSHOT'
-#    ports:
-#      - '8052:8052'
-#    depends_on:
-#      - postgres
+      - cm_data:/var/lib/postgresql/data
+    networks:
+      - cm_app
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "mydatabase"]
+      start_period: 1s
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
-#  kafka:
-#    image: 'bitnami/kafka:3.7'
-#    hostname: kafka
-#    ports:
-#      - "9092:9092"
-#    volumes:
-#      - 'kafka_data:/bitnami'
-#    environment:
-#      - KAFKA_CFG_NODE_ID=0
-#      - KAFKA_CFG_PROCESS_ROLES=controller,broker
-#      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
-#      - KAFKA_CFG_LISTENERS=PLAINTEXT://:29092,CONTROLLER://:9093,PLAINTEXT_HOST://:9092
-#      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-#      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-#      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-#      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
-#    networks:
-#      - kfk-net
-#
-#  kafka-ui:
-#    container_name: kafka-ui
-#    image: provectuslabs/kafka-ui:v0.7.2
-#    ports:
-#      - "9090:8080"
-#    environment:
-#      KAFKA_CLUSTER_0_NAME: local
-#      KAFKA_CLUSTER_0_BOOTSTRAPSERVERS: kafka:29092
-#      KAFKA_CLUSTER_0_KAFKACONNECT_0_NAME: kafka-connect
-#      KAFKA_CLUSTER_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
-#      DYNAMIC_CONFIG_ENABLED: 'true'
-#    networks:
-#      - kfk-net
-#
+  ds_app:
+    build: ./document_store
+    image: 'document_store:0.0.1-SNAPSHOT'
+    ports:
+      - '8052:8052'
+    depends_on:
+      ds_postgres:
+        condition: service_healthy
+    networks:
+      - kfk-net
+      - ds_app
+
+  ds_postgres:
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=mydatabase'
+      - 'POSTGRES_PASSWORD=secret'
+      - 'POSTGRES_USER=myuser'
+    volumes:
+      - ds_data:/var/lib/postgresql/data
+    networks:
+      - ds_app
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "mydatabase"]
+      start_period: 1s
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  kafka:
+    image: 'bitnami/kafka:3.7'
+    hostname: kafka
+    ports:
+      - "9092:9092"
+    volumes:
+      - 'kafka_data:/bitnami'
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:29092,CONTROLLER://:9093,PLAINTEXT_HOST://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+    networks:
+      - kfk-net
+    healthcheck:
+      test: kafka-topics.sh --bootstrap-server localhost:9092 --list
+      start_period: 10s
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:v0.7.2
+    ports:
+      - "9090:8080"
+    environment:
+      KAFKA_CLUSTER_0_NAME: local
+      KAFKA_CLUSTER_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTER_0_KAFKACONNECT_0_NAME: kafka-connect
+      KAFKA_CLUSTER_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    networks:
+      - kfk-net
+    healthcheck:
+      test: wget --spider -q http://localhost:8080/ || exit 1
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 #  kafka-connect:
 #    image: confluentinc/cp-kafka-connect:latest
 #    depends_on:
@@ -125,11 +261,20 @@ services:
 #        #
 #        sleep infinity
 #
-#networks:
-#  kfk-net:
-#    driver: bridge
+networks:
+  crm_app:
+    driver: bridge
+  ds_app:
+    driver: bridge
+  cm_app:
+      driver: bridge
+  kfk-net:
+    driver: bridge
+  keycloak:
+    driver: bridge
 
 volumes:
-  postgres_data:
-#  kafka_data:
-#    driver: local
+  crm_data:
+  cm_data:
+  ds_data:
+  kafka_data:
