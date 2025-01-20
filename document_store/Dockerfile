@@ -25,6 +25,9 @@ WORKDIR /app
 # Copy the jar file from the build stage
 COPY --from=build /app/build/libs/*.jar app.jar
 
+# Expose the port the app runs on
+EXPOSE 8080
+
 ENV SPRING_PROFILES_ACTIVE=docker
 
 # Set the entry point to run the jar file

@@ -26,158 +26,6 @@ services:
       timeout: 1s
       retries: 10
 
-#  postgres:
-#    image: 'postgres:latest'
-#    environment:
-#      - POSTGRES_DB=mydatabase
-#      - POSTGRES_PASSWORD=secret
-#      - POSTGRES_USER=myuser
-#    ports:
-#      - '5432:5432'
-#    networks:
-#      - kfk-net
-#    command:
-#      - "postgres"
-#      - "-c"
-#      - "shared_preload_libraries=pgoutput"
-#      - "-c"
-#      - "wal_level=logical"
-#    volumes:
-#      - 'postgres_data:/var/lib/postgresql/data'
-#    networks:
-#      - kfk-net
-#      - keycloak
-
-  crm_app:
-    build: ./customer_relationship_management
-    image: 'customer_relationship_management:0.0.1-SNAPSHOT'
-    ports:
-      - '8050:8050'
-    depends_on:
-      crm_postgres:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-    networks:
-      - crm_app
-      - ds_app
-      - kfk-net
-      - keycloak
-    healthcheck:
-      test: wget --spider -q http://localhost:8082/actuator/health || exit 1
-      start_period: 5s
-      interval: 5s
-      timeout: 1s
-      retries: 10
-
-  crm_postgres:
-    image: 'postgres:latest'
-    ports:
-      - '5432:5432'
-    environment:
-          - 'POSTGRES_DB=mydatabase'
-          - 'POSTGRES_PASSWORD=secret'
-          - 'POSTGRES_USER=myuser'
-    volumes:
-      - crm_data:/var/lib/postgresql/data
-    networks:
-      - crm_app
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "mydatabase"]
-      start_period: 1s
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  api_gateway_app:
-    build: ./api_gateway
-    image: 'api_gateway:0.0.1-SNAPSHOT'
-    ports:
-      - '8053:8053'
-    depends_on:
-      keycloak:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-    network_mode: host
-    healthcheck:
-      test: wget --spider -q http://localhost:8080/ || exit 1
-      start_period: 5s
-      interval: 5s
-      timeout: 1s
-      retries: 10
-
-  front_end_app:
-    build: ./front_end
-    image: 'front_end:0.0.1-SNAPSHOT'
-    ports:
-      - '5173:5173'
-    healthcheck:
-      test: curl -f http://localhost:5173 || exit 1
-      start_period: 1s
-      interval: 5s
-      timeout: 1s
-      retries: 10
-
-  cm_app:
-    build: ./communication_manager
-    image: 'communication_manager:0.0.1-SNAPSHOT'
-    networks:
-      - cm_app
-      - keycloak
-      - kfk-net
-    ports:
-      - '8082:8082'
-    depends_on:
-      cm_postgres:
-        condition: service_healthy
-
-  cm_postgres:
-    image: 'postgres:latest'
-    environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
-    volumes:
-      - cm_data:/var/lib/postgresql/data
-    networks:
-      - cm_app
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "mydatabase"]
-      start_period: 1s
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  ds_app:
-    build: ./document_store
-    image: 'document_store:0.0.1-SNAPSHOT'
-    ports:
-      - '8052:8052'
-    depends_on:
-      ds_postgres:
-        condition: service_healthy
-    networks:
-      - kfk-net
-      - ds_app
-
-  ds_postgres:
-    image: 'postgres:latest'
-    environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
-    volumes:
-      - ds_data:/var/lib/postgresql/data
-    networks:
-      - ds_app
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "mydatabase"]
-      start_period: 1s
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   kafka:
     image: 'bitnami/kafka:3.7'
     hostname: kafka
@@ -205,14 +53,12 @@ services:
 
   kafka-ui:
     container_name: kafka-ui
-    image: provectuslabs/kafka-ui:v0.7.2
+    image: provectuslabs/kafka-ui:latest
     ports:
-      - "9090:8080"
+      - "9091:8080"
     environment:
       KAFKA_CLUSTER_0_NAME: local
       KAFKA_CLUSTER_0_BOOTSTRAPSERVERS: kafka:29092
-      KAFKA_CLUSTER_0_KAFKACONNECT_0_NAME: kafka-connect
-      KAFKA_CLUSTER_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
       DYNAMIC_CONFIG_ENABLED: 'true'
     networks:
       - kfk-net
@@ -223,58 +69,117 @@ services:
       timeout: 5s
       retries: 10
 
-#  kafka-connect:
-#    image: confluentinc/cp-kafka-connect:latest
-#    depends_on:
-#      - kafka
-#      - postgres
-#    environment:
-#      CONNECT_BOOTSTRAP_SERVERS: kafka:29092
-#      CONNECT_REST_PORT: 8083
-#      CONNECT_GROUP_ID: "connect1"
-#      CONNECT_CONFIG_STORAGE_TOPIC: "connect1_config"
-#      CONNECT_OFFSET_STORAGE_TOPIC: "connect1_offset"
-#      CONNECT_STATUS_STORAGE_TOPIC: "connect1_status"
-#      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: "1"
-#      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "1"
-#      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "1"
-#      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-#      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-#      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-#      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-#      CONNECT_REST_ADVERTISED_HOST_NAME: "localhost"
-#      CONNECT_PLUGIN_PATH: '/usr/share/java,/etc/kafka-connect/jars,/usr/share/confluent-hub-components'
+#  api_gateway_app:
+#    build: ./api_gateway
+#    image: 'api_gateway:latest'
 #    ports:
-#      - "8083:8083"
-#    networks:
-#      - kfk-net
-#    command:
-#      - bash
-#      - -c
-#      - |
-#        echo "Installing Connector"
-#        confluent-hub install --no-prompt debezium/debezium-connector-postgresql:2.2.1
-#        confluent-hub install --no-prompt confluentinc/kafka-connect-datagen:0.4.0 confluent-hub install --no-prompt neo4j/kafka-connect-neo4j:2.0.0
-#        #
-#        echo "Launching Kafka Connect worker"
-#        /etc/confluent/docker/run &
-#        #
-#        sleep infinity
-#
-networks:
-  crm_app:
-    driver: bridge
-  ds_app:
-    driver: bridge
+#      - '8080:8080'
+##    networks:
+##      - keycloak
+##      - kfk-net
+#    depends_on:
+#      keycloak:
+#        condition: service_healthy
+#      kafka:
+#        condition: service_healthy
+#    network_mode: host
+#    healthcheck:
+#      test: wget --spider -q http://localhost:8080/ || exit 1
+#      start_period: 5s
+#      interval: 5s
+#      timeout: 1s
+#      retries: 10
+
   cm_app:
-      driver: bridge
+    build: ./communication_manager
+    image: 'communication_manager:latest'
+    networks:
+      - keycloak
+      - kfk-net
+    ports:
+      - '8082:8082'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: wget --spider -q http://localhost:8082/actuator/health || exit
+      start_period: 20s
+      interval: 5s
+      timeout: 1s
+      retries: 10
+
+  crm_app:
+    build: ./customer_relationship_management
+    image: 'customer_relationship_management:latest'
+    ports:
+      - '8050:8050'
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - kfk-net
+      - keycloak
+    healthcheck:
+      test: wget --spider -q http://localhost:8050/actuator/health || exit 1
+      start_period: 5s
+      interval: 5s
+      timeout: 1s
+      retries: 10
+
+  ds_app:
+    build: ./document_store
+    image: 'document_store:latest'
+    ports:
+      - '8052:8052'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - kfk-net
+    healthcheck:
+      test: wget --spider -q http://localhost:8052/actuator/health || exit
+      start_period: 20s
+      interval: 5s
+      timeout: 1s
+      retries: 10
+
+  front_end_app:
+    build: ./front_end
+    image: 'front_end:latest'
+    ports:
+      - '5173:5173'
+    healthcheck:
+      test: curl -f http://localhost:5173 || exit 1
+      start_period: 1s
+      interval: 5s
+      timeout: 1s
+      retries: 10
+
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=mydatabase'
+      - 'POSTGRES_PASSWORD=secret'
+      - 'POSTGRES_USER=myuser'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - kfk-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "mydatabase"]
+      start_period: 1s
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+networks:
   kfk-net:
     driver: bridge
   keycloak:
     driver: bridge
 
 volumes:
-  crm_data:
-  cm_data:
-  ds_data:
+  postgres_data:
   kafka_data:
