@@ -2,9 +2,6 @@
 spring:
   application:
     name: api_gateway
-  docker:
-    compose:
-      file: ./api_gateway/compose.yaml
   security:
     oauth2:
       client:
@@ -59,10 +56,3 @@ spring:
             filters:
               - RedirectTo=301,http://localhost:8080/ui
 
-management.endpoints.web.exposure.include: '*'
-management.endpoint.health.show.details: always
-logging:
-  level:
-    org.springframework:
-      web: DEBUG
-      cloud.gateway: DEBUG
