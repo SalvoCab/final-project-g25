@@ -3,13 +3,14 @@ package com.example.analytics.dtos
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class JobOfferAnalyticsDTO (
-    @JsonProperty("id")  val id:Long,
+    @JsonProperty("id")  val id:Long?,
     @JsonProperty("description")  val description : String,
-    @JsonProperty("customer") val customer: String,
-    @JsonProperty("requiredSkills") val requiredSkills: MutableSet<String>,
-    @JsonProperty("duration") val duration: Long,
-    @JsonProperty("offerStatus") val offerStatus: String,
+    @JsonProperty("state")  val state : String,
     @JsonProperty("notes") val notes: String?,
-    @JsonProperty("professional") val professional: String?,    //during the lifecycle of a joboffer professional can be empty
-    @JsonProperty("value")  val value:Double?                   //when a professional is not present value cannot be computed
+    @JsonProperty("duration") val duration: Int,
+    @JsonProperty("value")  val value:Double?,
+    @JsonProperty("customer") val customer: String?,
+    @JsonProperty("professional") val professional: String?,
+    @JsonProperty("skills") val skills: List<String>
+
 )

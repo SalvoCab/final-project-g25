@@ -6,16 +6,16 @@ import jakarta.persistence.*
 @Entity
 data class JobOfferAnalytics (
     @Id
-    var id:Long = 0,
-    var description : String? = null,
+    var id:Long? =0,
+    var description : String = "",
+    var state: String = "",
+    var notes: String = "",
+    var duration: Int =0,
+    var value:Double?=null,
     var customer: String? = null,
+    var professional: String? =null,
     @ElementCollection(fetch = FetchType.EAGER)
-    var requiredSkills: MutableSet<String> = mutableSetOf(),
-    var duration: Long?= null,
-    var offerStatus: String? = null,
-    var notes: String? = null,
-    var professional: String? = null,
-    var value:Double? = null
+    var skills: List<String> = listOf(),
 ){
 
 }

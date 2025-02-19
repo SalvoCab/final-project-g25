@@ -11,7 +11,7 @@ class DocumentMetadataAnalyticsService(private val documentMetadataAnalyticsRepo
     @KafkaListener(topics = ["DOCUMENT"], groupId = "consumer-monitoring-group",containerFactory = "kafkaDocumentListenerContainerFactory")
     fun messageListener( document: DocumentMetadataAnalyticsDTO) {
 
-        documentMetadataAnalyticsRepository.save(DocumentMetadataAnalytics(document.id,document.version,document.name,document.size,document.contentType,document.creationTimestamp))
+        documentMetadataAnalyticsRepository.save(DocumentMetadataAnalytics(document.id,document.name,document.size,document.contentType,document.createdOn))
 
 
     }
