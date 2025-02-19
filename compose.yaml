@@ -177,6 +177,24 @@ services:
       timeout: 5s
       retries: 10
 
+  analytics:
+    build: ./analytics
+    image: analytics:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - kfk-net
+      - keycloak
+    ports:
+      - "8084:8084"
+    healthcheck:
+      test: bash -c ':> /dev/tcp/localhost/8084'
+      start_period: 15s
+      interval: 5s
+      timeout: 1s
+      retries: 10
+
 networks:
   kfk-net:
     driver: bridge
