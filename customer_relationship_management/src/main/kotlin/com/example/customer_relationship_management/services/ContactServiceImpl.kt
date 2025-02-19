@@ -25,6 +25,14 @@ class ContactServiceImpl (private val contactRepository: ContactRepository, priv
 
         return contactRepository.save(c)
     }
+    override fun createFullContact(name: String, surname: String, category: String, ssnCode: String?,email: String,address: String,phoneNumber:String): Contact {
+        val c = createContact(name,surname,category,ssnCode)
+        c.addEmail(Email(email))
+        c.addAddress(Address(address))
+        c.addPhoneNumber(PhoneNumber(phoneNumber))
+
+        return contactRepository.save(c)
+    }
 
     override fun listAll(): List<ContactDTO> {
         return contactRepository.findAll().map{it.toDto()}

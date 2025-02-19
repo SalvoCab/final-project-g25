@@ -1,5 +1,5 @@
 # Use an official Gradle image to build the application
-FROM gradle:jdk17 AS build
+FROM gradle:jdk21 AS build
 
 # Set the working directory in the container
 WORKDIR /app
@@ -17,7 +17,7 @@ ENV SPRING_PROFILES_ACTIVE=docker
 RUN ./gradlew clean build -x test
 
 # Use an official OpenJDK runtime as a parent image
-FROM eclipse-temurin:17
+FROM openjdk:21-jdk
 
 # Set the working directory in the container
 WORKDIR /app

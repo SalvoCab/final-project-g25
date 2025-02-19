@@ -1,5 +1,6 @@
 services:
   keycloak:
+    build: ./keycloak_spi
     image: keycloak/keycloak
     ports:
       - '9095:8080'

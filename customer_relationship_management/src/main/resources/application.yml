@@ -17,13 +17,18 @@ spring:
      bootstrap-servers: 127.0.0.1:9092
      group-id: consumer
      auto-offset-reset: earliest
+
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:9095/realms/kc1
+keycloak:
+  server-url: http://localhost:9095
+  realm: kc1
+  client-id: kc1client
+  client-secret: A4PGV1WAVvB528I2rCXsY00Bv2JMAERW
 server:
   port: 8050
 
 
-eventTopic: events

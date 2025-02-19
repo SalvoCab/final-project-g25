@@ -18,5 +18,8 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:9095/realms/kc1
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
 server:
   port: 8052

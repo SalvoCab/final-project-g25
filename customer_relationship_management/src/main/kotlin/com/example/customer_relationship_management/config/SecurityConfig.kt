@@ -99,7 +99,9 @@ class JwtAuthConfigurationProperties {
 }
 
 @Component
-class JwtAuthConverter(private val jwtProperties: JwtAuthConfigurationProperties) : Converter<Jwt?, AbstractAuthenticationToken?> {
+class JwtAuthConverter(
+    private val jwtProperties: JwtAuthConfigurationProperties
+) : Converter<Jwt, AbstractAuthenticationToken> {
     private val jwtGrantedAuthoritiesConverter = JwtGrantedAuthoritiesConverter()
 
     override fun convert(jwt: Jwt): AbstractAuthenticationToken {
