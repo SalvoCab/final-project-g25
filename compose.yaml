@@ -39,7 +39,7 @@ services:
       - KAFKA_CFG_PROCESS_ROLES=controller,broker
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:29092,CONTROLLER://:9093,PLAINTEXT_HOST://:9092
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092
       - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
@@ -95,6 +95,7 @@ services:
     build: ./communication_manager
     image: 'communication_manager:latest'
     networks:
+      - postgres
       - keycloak
       - kfk-net
     ports:
@@ -120,6 +121,7 @@ services:
       postgres:
         condition: service_healthy
     networks:
+      - postgres
       - kfk-net
       - keycloak
     healthcheck:
@@ -138,6 +140,7 @@ services:
       postgres:
         condition: service_healthy
     networks:
+      - postgres
       - kfk-net
     healthcheck:
       test: wget --spider -q http://localhost:8052/actuator/health || exit
@@ -169,6 +172,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
+      - postgres
       - kfk-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready", "-d", "mydatabase"]
@@ -181,11 +185,12 @@ services:
     build: ./analytics
     image: analytics:latest
     depends_on:
-      postgres:
+      analytics_db:
         condition: service_healthy
     networks:
       - kfk-net
       - keycloak
+      - analytics-net
     ports:
       - "8084:8084"
     healthcheck:
@@ -195,12 +200,34 @@ services:
       timeout: 1s
       retries: 10
 
+  analytics_db:
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=mydatabase'
+      - 'POSTGRES_PASSWORD=secret'
+      - 'POSTGRES_USER=myuser'
+    volumes:
+      - analytics_data:/var/lib/postgresql/data
+    networks:
+      - analytics-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "mydatabase"]
+      start_period: 1s
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 networks:
+  postgres:
+    driver: bridge
   kfk-net:
     driver: bridge
   keycloak:
+    driver: bridge
+  analytics-net:
     driver: bridge
 
 volumes:
   postgres_data:
   kafka_data:
+  analytics_data:

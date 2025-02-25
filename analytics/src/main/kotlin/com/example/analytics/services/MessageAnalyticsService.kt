@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class MessageAnalyticsService(private val messageAnalyticsRepository: MessageAnalyticsRepository) {
-    @KafkaListener(topics = ["MESSAGE"], groupId = "group1",containerFactory = "kafkaMessageListenerContainerFactory")
+    @KafkaListener(topics = ["MESSAGE"], groupId = "consumer-monitoring-group",containerFactory = "kafkaMessageListenerContainerFactory")
     fun messageListener( message: MessageAnalyticsDTO) {
         val msg = messageAnalyticsRepository.findById(message.id!!)
         if (!msg.isPresent){
