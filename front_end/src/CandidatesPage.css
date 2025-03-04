@@ -1,0 +1,130 @@
+/* General styles for CandidatesPage */
+.candidates-page {
+  display: flex;
+  flex-direction:column;
+  align-items: left;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* Header styling */
+.candidates-page header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.candidates-page header h1 {
+  font-size: 2.5rem;
+  color: #333;
+  margin: 0;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 8px;
+}
+
+/* Content layout */
+.candidates-content {
+  display: flex;
+  gap: 30px;
+  width: 100%;
+  max-width: 1200px;
+  justify-content: space-between;
+}
+
+/* Sidebar (Add Candidate Form) */
+.candidates-content aside {
+  flex: 1 1 50%;  /* Allocate 50% of the space for the form (increased from 40%) */
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-width: 350px;  /* Ensures the form doesn't shrink too much on smaller screens */
+}
+
+.candidates-content aside h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  color: #4CAF50;
+}
+
+.add-candidate input,
+.add-candidate button {
+  display: block;
+  width: 95%;
+  margin-bottom: 10px;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.add-candidate button {
+  background-color: #4CAF50;
+  color: white;
+  cursor: pointer;
+}
+
+.add-candidate button:hover {
+  background-color: #45a049;
+}
+
+/* Main section (Candidate List) */
+.candidates-content main {
+  flex: 1 1 55%; /* Allocate less space for the candidate list */
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.candidate-list h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  color: #4CAF50;
+}
+
+.candidate-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.candidate-list li {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: left;
+}
+
+.candidate-list li:last-child {
+  border-bottom: none;
+}
+
+.candidate-list a {
+  text-decoration: none;
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+.candidate-list a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .candidates-content {
+    flex-direction: column;
+  }
+
+  .candidates-content aside,
+  .candidates-content main {
+    width: 100%;
+  }
+}

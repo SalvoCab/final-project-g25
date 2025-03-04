@@ -1,0 +1,44 @@
+/* Job Offer Page Layout */
+.job-offer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .page-title {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+  
+  /* Flexbox Layout for Form and List */
+  .job-offer-content {
+    display: flex;
+    gap: 20px;
+  }
+  
+  /* Left Side: Form */
+  .job-form-section {
+    flex: 1;
+    background: #f4f4f4;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Right Side: Job Proposal List */
+  .job-list-section {
+    flex: 2;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 900px) {
+    .job-offer-content {
+      flex-direction: column;
+    }
+  }
+  
