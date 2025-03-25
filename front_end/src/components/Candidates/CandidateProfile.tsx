@@ -1,7 +1,20 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 
-const candidates = [
+interface Candidate {
+  id: string;
+  name: string;
+  surname: string;
+  skills: string;
+  experience: number;
+  email: string;
+  address: string;
+  ssn: string;
+  telephone: string;
+  photo: string;
+}
+
+const candidates: Candidate[] = [
   {
     id: '1',
     name: 'Abolfazl',
@@ -40,9 +53,8 @@ const candidates = [
   },
 ];
 
-const CandidateProfile = () => {
-  const { candidateId } = useParams();
-
+const CandidateProfile: React.FC = () => {
+  const { candidateId } = useParams<{ candidateId: string }>();
 
   const candidate = candidates.find((c) => c.id === candidateId);
 
@@ -51,15 +63,15 @@ const CandidateProfile = () => {
   }
 
   return (
-    <div className="candidate-profile">
-      <h2>{candidate.name} {candidate.surname}</h2>
-      <img src={candidate.photo} alt={`${candidate.name} ${candidate.surname}`} />
-      <p><strong>Skills:</strong> {candidate.skills}</p>
-      <p><strong>Experience:</strong> {candidate.experience}</p>
-      <p><strong>Email:</strong> {candidate.email}</p>
-      <p><strong>Address:</strong> {candidate.address}</p>
-      <p><strong>Telephone:</strong> {candidate.telephone}</p>
-    </div>
+      <div className="candidate-profile">
+        <h2>{candidate.name} {candidate.surname}</h2>
+        <img src={candidate.photo} alt={`${candidate.name} ${candidate.surname}`} />
+        <p><strong>Skills:</strong> {candidate.skills}</p>
+        <p><strong>Experience:</strong> {candidate.experience} years</p>
+        <p><strong>Email:</strong> {candidate.email}</p>
+        <p><strong>Address:</strong> {candidate.address}</p>
+        <p><strong>Telephone:</strong> {candidate.telephone}</p>
+      </div>
   );
 };
 
