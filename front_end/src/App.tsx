@@ -41,18 +41,6 @@ function App() {
     return (
         <Router>
             <Navbar me={me} />
-            <header className="app-header">
-                <h1>Management System</h1>
-                <nav className="nav-bar">
-                    <ul className="nav-list">
-                        <li><Link to="/" className="nav-item">Home</Link></li>
-                        <li><Link to="/candidates" className="nav-item">Candidates</Link></li>
-                        <li><Link to="/documents" className="nav-item">Documents</Link></li>
-                        <li><Link to="/job-offers" className="nav-item">Job Offers</Link></li>
-                    </ul>
-                </nav>
-            </header>
-
             <main>
                 {me && me.principal ? (
                     <Routes>
