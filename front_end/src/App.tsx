@@ -3,11 +3,11 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
 import Navbar from "./components/navbar/navbar";
 import ProfilePage from "./pages/profilePage/profilePage";
-import DocumentsPage from "./pages/DocumentsPage/DocumentsPage.tsx";
-import CandidatesPage from "./pages/candidatesPage/CandidatesPage.tsx";
-import CandidateProfile from "./components/Candidates/CandidateProfile.tsx";
-import EditCandidate from "./components/Candidates/EditCandidate.tsx";
-import JobOfferPage from "./pages/jobOfferPage/JobOfferPage";
+// import DocumentsPage from "./pages/DocumentsPage/DocumentsPage.tsx";
+// import CandidatesPage from "./pages/candidatesPage/CandidatesPage.tsx";
+// import CandidateProfile from "./components/Candidates/CandidateProfile.tsx";
+// import EditCandidate from "./components/Candidates/EditCandidate.tsx";
+import AddJobOfferPage from "./pages/jobOfferPage/JobOfferPage";
 
 export interface MeInterface {
     name: string;
@@ -46,11 +46,11 @@ function App() {
                     <Routes>
                         <Route path="/" element={<h2>Welcome to the Management System</h2>} />
                         <Route path="/profile" element={<ProfilePage me={me} />} />
-                        <Route path="/candidates" element={<CandidatesPage />} />
-                        <Route path="/candidates/:candidateId" element={<CandidateProfile />} />
-                        <Route path="/candidates/:candidateId/edit" element={<EditCandidate />} />
-                        <Route path="/documents" element={<DocumentsPage />} />
-                        <Route path="/job-offers" element={<JobOfferPage />} />
+                        {/*<Route path="/candidates" element={<CandidatesPage />} />*/}
+                        {/*<Route path="/candidates/:candidateId" element={<CandidateProfile />} />*/}
+                        {/*<Route path="/candidates/:candidateId/edit" element={<EditCandidate />} />*/}
+                        {/*<Route path="/documents" element={<DocumentsPage />} />*/}
+                        <Route path="/job-offers" element={<AddJobOfferPage customerId={42} availableSkills={[{ id: 1, name: "Java" }, { id: 2, name: "Kotlin" }]}/>} />
                     </Routes>
                 ) : (
                     <div className="d-flex justify-content-center align-items-center vh-100">

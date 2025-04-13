@@ -14,5 +14,5 @@ export interface CreateJobOffer{
     description: string
     notes?: string
     duration: number
-    skills: string[]
+    skills: number[]
 }
