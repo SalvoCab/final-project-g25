@@ -16,3 +16,14 @@ export interface CreateJobOffer{
     duration: number
     skills: number[]
 }
+
+export interface Skill {
+    id: number;
+    name: string;
+}
+
+export interface UpdateJobOfferStatusDTO {
+    state: string;
+    notes: string;
+    professionalId?: number | null;
+}

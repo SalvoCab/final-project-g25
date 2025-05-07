@@ -8,6 +8,7 @@ import ProfilePage from "./pages/profilePage/profilePage";
 // import CandidateProfile from "./components/Candidates/CandidateProfile.tsx";
 // import EditCandidate from "./components/Candidates/EditCandidate.tsx";
 import AddJobOfferPage from "./pages/jobOfferPage/JobOfferPage";
+import ListJobOffers from "./pages/jobOfferPage/JobOfferList.tsx";
 
 export interface MeInterface {
     name: string;
@@ -51,6 +52,7 @@ function App() {
                         {/*<Route path="/candidates/:candidateId/edit" element={<EditCandidate />} />*/}
                         {/*<Route path="/documents" element={<DocumentsPage />} />*/}
                         <Route path="/job-offers" element={<AddJobOfferPage customerId={42} availableSkills={[{ id: 1, name: "Java" }, { id: 2, name: "Kotlin" }]}/>} />
+                        <Route path="/job-offers-list" element={<ListJobOffers/>} />
                     </Routes>
                 ) : (
                     <div className="d-flex justify-content-center align-items-center vh-100">

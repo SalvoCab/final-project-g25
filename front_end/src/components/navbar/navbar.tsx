@@ -25,11 +25,14 @@ const Navbar: React.FC<NavbarProps> = ({ me }) => {
                                 <li className="nav-item">
                                     <Link className="nav-link" to="/job-offers">vai</Link>
                                 </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/job-offers-list">lista</Link>
+                                </li>
                             </>
                         }
                         {me && me.principal == null && me.loginUrl &&
                             <li className="nav-item">
-                                <button className="btn btn-outline-light"
+                            <button className="btn btn-outline-light"
                                         onClick={() => window.location.href = me?.loginUrl}>Login
                                 </button>
                             </li>
