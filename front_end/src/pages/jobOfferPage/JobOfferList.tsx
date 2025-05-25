@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { JobOffer } from "../../objects/JobOffer.ts";
-import { listJobOffers } from  "../../API.tsx";
+import {listJobOffers} from "../../apis/apiJobOffer.tsx";
+
 export default function ListJobOffers() {
     const [jobOffers, setJobOffers] = useState<JobOffer[]>([]);
     const [loading, setLoading] = useState(true);

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { addJobOffer} from "../../API.tsx";
 import { CreateJobOffer} from "../../objects/JobOffer.ts";
+import {addJobOffer} from "../../apis/apiJobOffer.tsx";
 
 interface AddJobOfferPageProps {
   customerId: number;
