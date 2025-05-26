@@ -18,12 +18,12 @@ export function listMessages(
     sortDirection = 1
 ): Promise<MessageDTO[]> {
     const query = buildQueryParams({ page, limit, state, sortField, sortDirection });
-    return customFetch<MessageDTO[]>(`crm/messages?${query}`);
+    return customFetch<MessageDTO[]>(`/crm/messages?${query}`);
 }
 
 // 2. Crea un nuovo messaggio (POST)
 export function createMessage(dto: CreateMessageDTO): Promise<MessageDTO> {
-    return customFetch<MessageDTO>("crm/messages", {
+    return customFetch<MessageDTO>("/crm/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dto),
@@ -32,12 +32,12 @@ export function createMessage(dto: CreateMessageDTO): Promise<MessageDTO> {
 
 // 3. Ottieni messaggio per ID (GET)
 export function getMessageById(messageId: number): Promise<any> {
-    return customFetch<any>(`crm/messages/${messageId}`);
+    return customFetch<any>(`/crm/messages/${messageId}`);
 }
 
 // 4. Cambia stato messaggio (POST)
 export function changeMessageState(messageId: number, dto: HistoryDTO): Promise<any> {
-    return customFetch<any>(`crm/messages/${messageId}`, {
+    return customFetch<any>(`/crm/messages/${messageId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dto),
@@ -46,12 +46,12 @@ export function changeMessageState(messageId: number, dto: HistoryDTO): Promise<
 
 // 5. Ottieni la cronologia messaggi (GET)
 export function getMessageHistory(messageId: number): Promise<HistoryDTO[]> {
-    return customFetch<HistoryDTO[]>(`crm/messages/${messageId}/history`);
+    return customFetch<HistoryDTO[]>(`/crm/messages/${messageId}/history`);
 }
 
 // 6. Cambia priorità messaggio (PUT)
 export function changeMessagePriority(messageId: number, priority: number): Promise<any> {
-    return customFetch<any>(`crm/messages/${messageId}/priority`, {
+    return customFetch<any>(`/crm/messages/${messageId}/priority`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(priority),
