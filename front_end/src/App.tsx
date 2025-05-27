@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
 import Navbar from "./components/navbar/navbar";
 import ProfilePage from "./pages/profilePage/profilePage";
+import { Container, Row, Col, Card,Button } from 'react-bootstrap';
 // import DocumentsPage from "./pages/DocumentsPage/DocumentsPage.tsx";
 // import CandidatesPage from "./pages/candidatesPage/CandidatesPage.tsx";
 // import CandidateProfile from "./components/Candidates/CandidateProfile.tsx";
@@ -55,14 +56,86 @@ function App() {
                         <Route path="/job-offers-list" element={<ListJobOffers/>} />
                     </Routes>
                 ) : (
-                    <div className="d-flex justify-content-center align-items-center vh-100">
-                        <h2>Login to see your profile</h2>
-                    </div>
+                    <Container className="py-5">
+                        {/* Hero Section */}
+                        <Row className="text-center mb-5">
+                            <Col>
+                                <h1 className="display-4 mb-5">The platform that connects talent and opportunity</h1>
+                                <div className="decorative-line-gradient"></div>
+                            </Col>
+                        </Row>
+
+                        {/* Box Section */}
+                        <Row className="mb-5 gx-4">
+                            <Col md={6}>
+                                <Card className="h-100 custom-card">
+                                    <Card.Body className="d-flex align-items-center justify-content-center p-5">
+                                        <h3 className="text-center">Are you a company looking for reliable professionals?</h3>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                            <Col md={6}>
+                                <Card className="h-100 custom-card">
+                                    <Card.Body className="d-flex align-items-center justify-content-center p-5">
+                                        <h3 className="text-center">Are you a professional ready to showcase your skills?</h3>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
+
+
+                        {/* Main Value Proposition */}
+                        <Row className="mb-5">
+                            <Col lg={8} className="mx-auto text-center">
+                                <p className="lead">
+                                    Our platform was created to build real, targeted connections between job providers and job seekers.
+                                    Unlike automated portals, every job listing here is personally managed by our team, ensuring quality
+                                    and the perfect match.
+                                </p>
+                            </Col>
+                        </Row>
+
+                        {/* Process Steps */}
+                        <Row className="mb-5 gx-4">
+                            <Col md={4}>
+                                <div className="process-step text-center p-4">
+                                    <p className="lead mb-0">Companies send us open positions.</p>
+                                </div>
+                            </Col>
+                            <Col md={4}>
+                                <div className="process-step text-center p-4">
+                                    <p className="lead mb-0">Professionals submit their CV and skills.</p>
+                                </div>
+                            </Col>
+                            <Col md={4}>
+                                <div className="process-step text-center p-4">
+                                    <p className="lead mb-0">Our manager takes care of the rest.</p>
+                                </div>
+                            </Col>
+                        </Row>
+
+                        {/* Bottom CTA Section */}
+                        <Row className="text-center mt-5">
+                            <Col>
+                                <h3 className="mb-4">Simple. Human. Effective.</h3>
+                                <p className="lead mb-4">
+                                    Get in touch with us today and start building your next success, whether you're looking
+                                    for top talent or your next professional opportunity.
+                                </p>
+                                <Button className="btn-contact-filled">Contact Us</Button>
+
+
+                            </Col>
+                        </Row>
+
+                    </Container>
+
+
                 )}
             </main>
 
             <footer>
-                <p>© 2024 Management System</p>
+                <p>© 2024 Match&Work</p>
             </footer>
         </Router>
     );
