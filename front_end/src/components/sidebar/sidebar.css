@@ -1,0 +1,31 @@
+.sidebar {
+    height: 100%;
+    background-color: #14382C;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar a {
+    color: #F6F5EC;
+    text-decoration: none;
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+    transition: all 0.2s ease-in-out;
+    padding-left: 20%;
+}
+
+/* Evita il colore blu durante hover, focus o active */
+.sidebar a:hover,
+.sidebar a:focus,
+.sidebar a:active {
+    color: #F6F5EC;
+    text-decoration: underline;
+}
+
+/* Stile del link attivo */
+.sidebar a.active {
+    text-decoration: underline;
+    font-weight: bold;
+    color: #F6F5EC;
+}

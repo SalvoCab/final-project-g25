@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
 import Navbar from "./components/navbar/navbar";
+import Sidebar from "./components/sidebar/sidebar.tsx";
 import ProfilePage from "./pages/profilePage/profilePage";
 import { Container, Row, Col, Card,Button } from 'react-bootstrap';
 // import DocumentsPage from "./pages/DocumentsPage/DocumentsPage.tsx";
@@ -45,16 +46,21 @@ function App() {
             <Navbar me={me} />
             <main>
                 {me && me.principal ? (
-                    <Routes>
-                        <Route path="/" element={<h2>Welcome to the Management System</h2>} />
-                        <Route path="/profile" element={<ProfilePage me={me} />} />
-                        {/*<Route path="/candidates" element={<CandidatesPage />} />*/}
-                        {/*<Route path="/candidates/:candidateId" element={<CandidateProfile />} />*/}
-                        {/*<Route path="/candidates/:candidateId/edit" element={<EditCandidate />} />*/}
-                        {/*<Route path="/documents" element={<DocumentsPage />} />*/}
-                        <Route path="/job-offers" element={<AddJobOfferPage customerId={42} availableSkills={[{ id: 1, name: "Java" }, { id: 2, name: "Kotlin" }]}/>} />
-                        <Route path="/job-offers-list" element={<ListJobOffers/>} />
-                    </Routes>
+                    <Container fluid>
+                        <Row>
+                            <Col md={3} lg={2} className="sidebar-wrapper p-0">
+                                <Sidebar />
+                            </Col>
+                            <Col md={9} lg={10} className="main-content">
+                                <Routes>
+                                    <Route path="/" element={<h2>Welcome to the Management System</h2>} />
+                                    <Route path="/profile" element={<ProfilePage me={me} />} />
+                                    <Route path="/job-offers" element={<AddJobOfferPage customerId={42} availableSkills={[{ id: 1, name: "Java" }, { id: 2, name: "Kotlin" }]}/>} />
+                                    <Route path="/job-offers-list" element={<ListJobOffers/>} />
+                                </Routes>
+                            </Col>
+                        </Row>
+                    </Container>
                 ) : (
                     <Container className="py-5">
                         {/* Hero Section */}
@@ -133,7 +139,6 @@ function App() {
 
                 )}
             </main>
-
             <footer>
                 <p>© 2024 Match&Work</p>
             </footer>

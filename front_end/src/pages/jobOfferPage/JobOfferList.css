@@ -1,0 +1,32 @@
+.job-offer-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.job-offer-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-bottom: 1px solid #14382C;
+}
+
+.btn-primary {
+    background-color: #14382C;
+    border-color: #14382C;
+}
+
+.btn-primary:hover {
+    background-color: #0f2a21;
+    border-color: #0f2a21;
+}
+
+.btn-outline-primary {
+    color: #14382C;
+    border-color: #14382C;
+}
+
+.btn-outline-primary:hover {
+    background-color: #14382C;
+    border-color: #14382C;
+}
