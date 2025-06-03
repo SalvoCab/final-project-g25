@@ -1,0 +1,249 @@
+import { useEffect, useState } from "react";
+import { listContacts } from "../../apis/apiContact.tsx";
+import { ContactDTO } from "../../objects/Contact.ts";
+import {
+    Container, Row, Col, Card, Button, Spinner, Alert,
+    Form, ListGroup
+} from 'react-bootstrap';
+import {
+    BsEnvelope, BsGeoAlt, BsPersonBadge,
+    BsPersonVcard, BsTelephone
+} from "react-icons/bs";
+import { MeInterface } from '../../App.tsx';
+import AddContactModal from "./addContactModal.tsx"
+
+
+interface ListContactsProps {
+    me: MeInterface | null;
+}
+
+const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
+    const [contacts, setContacts] = useState<ContactDTO[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState(0);
+    const [limit, setLimit] = useState(20);
+    const [hasMore, setHasMore] = useState(false);
+    const [filters, setFilters] = useState({
+        email: "",
+        address: "",
+        number: "",
+        keyword: ""
+    });
+    const [showModal, setShowModal] = useState(false);
+    const role = me?.role ?? "";
+    const permissions = {
+        canView: ["manager", "operator", "guest"],
+        canAddEdit: ["manager", "operator"],
+        canDelete: ["manager"]
+    };
+
+    const canAddEdit = permissions.canAddEdit.includes(role);
+    const canDelete = permissions.canDelete.includes(role);
+
+
+    useEffect(() => {
+        setLoading(true);
+        setError(null);
+
+        listContacts({ ...filters, page, limit })
+            .then((data) => {
+                setContacts(data);
+                setHasMore(data.length === limit);
+            })
+            .catch((err: any) => {
+                setError(err.message || "Errore durante il caricamento dei contatti");
+                setContacts([]);
+            })
+            .finally(() => setLoading(false));
+    }, [page, filters]);
+
+    const handleInputChange = (e: React.ChangeEvent<any>) => {
+        const { name, value } = e.target;
+        setFilters((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleSearch = () => {
+        setPage(0);
+    };
+
+    const renderContactCard = (contact: ContactDTO) => (
+        <Card
+            key={contact.id}
+            className="mb-3 contact-card"
+            style={{ backgroundColor: '#F6F5EC', border: '1px solid #14382C' }}
+        >
+            <Card.Body>
+                <h5 className="mb-3">
+                    {contact.name} {contact.surname}
+                </h5>
+
+                <Row>
+                    <Col md={6}>
+                        <ListGroup variant="flush">
+                            <ListGroup.Item style={{ backgroundColor: '#F6F5EC' }}>
+                                <BsPersonBadge className="me-2" />
+                                <strong>Categoria:</strong> {contact.category}
+                            </ListGroup.Item >
+                            {contact.ssnCode && (
+                                <ListGroup.Item style={{ backgroundColor: '#F6F5EC' }}>
+                                    <BsPersonVcard className="me-2" />
+                                    <strong>SSN Code:</strong> {contact.ssnCode}
+                                </ListGroup.Item>
+                            )}
+                        </ListGroup>
+                    </Col>
+
+                    <Col md={6}>
+                        <ListGroup variant="flush">
+                            <ListGroup.Item style={{ backgroundColor: '#F6F5EC' }}>
+                                <BsEnvelope className="me-2" />
+                                <strong>Email:</strong> {contact.emails.join(", ") || "None"}
+                            </ListGroup.Item>
+                            <ListGroup.Item style={{ backgroundColor: '#F6F5EC' }}>
+                                <BsGeoAlt className="me-2" />
+                                <strong>Address:</strong> {contact.addresses.join(", ") || "None"}
+                            </ListGroup.Item>
+                            <ListGroup.Item style={{ backgroundColor: '#F6F5EC' }}>
+                                <BsTelephone className="me-2" />
+                                <strong>Phone number:</strong> {contact.phoneNumber.join(", ") || "None"}
+                            </ListGroup.Item>
+                        </ListGroup>
+                    </Col>
+                </Row>
+
+                {/* Azioni visibili in base al ruolo */}
+                {(canAddEdit || canDelete) && (
+                    <div className="mt-3 d-flex gap-2">
+                        {canAddEdit && <Button variant="warning">Edit</Button>}
+                        {canDelete && <Button variant="danger">Delete</Button>}
+                    </div>
+                )}
+            </Card.Body>
+        </Card>
+    );
+
+    return (
+        <Container fluid className="py-4">
+            <Row>
+                {/* Lista Contatti */}
+                <Col md={9}>
+                    <h2 className="mb-4">Contacts</h2>
+
+                    {canAddEdit && (
+                        <div className="mb-3">
+                            <Button className="btn-contact-filled" onClick={() => setShowModal(true)} >Add Contact</Button>
+                        </div>
+                    )}
+
+                    <Form.Group as={Row} className="mb-3">
+                        <Form.Label column sm="4">Items per page:</Form.Label>
+                        <Col sm="3">
+                            <Form.Select
+                                value={limit}
+                                onChange={(e) => { setLimit(parseInt(e.target.value)); setPage(0); }}
+                            >
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={50}>50</option>
+                            </Form.Select>
+                        </Col>
+                    </Form.Group>
+
+                    {loading && (
+                        <div className="text-center py-5">
+                            <Spinner animation="border" role="status">
+                                <span className="visually-hidden">Loading...</span>
+                            </Spinner>
+                        </div>
+                    )}
+
+                    {error && <Alert variant="danger">{error}</Alert>}
+
+                    {!loading && !error && contacts.length === 0 && (
+                        <Alert variant="info">No contacts found.</Alert>
+                    )}
+
+                    {!loading && !error && contacts.map(renderContactCard)}
+
+                    {!loading && !error && contacts.length > 0 && (
+                        <div className="d-flex justify-content-between align-items-center mt-4">
+                            <Button
+                                variant="outline-primary"
+                                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                                disabled={page === 0}
+                            >
+                                Indietro
+                            </Button>
+                            <span>Page {page + 1}</span>
+                            <Button
+                                variant="primary"
+                                onClick={() => setPage((p) => p + 1)}
+                                disabled={!hasMore}
+                            >
+                                Avanti
+                            </Button>
+                        </div>
+                    )}
+                </Col>
+
+                {/* Sidebar Filtri */}
+                <Col md={3}>
+                    <div style={{ position: 'sticky', top: '80px' }}>
+                        <Card>
+                            <Card.Header className="bg-white">
+                                <h5 className="mb-0">Filters</h5>
+                            </Card.Header>
+                            <Card.Body>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Email</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="email"
+                                        value={filters.email}
+                                        onChange={handleInputChange}
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Phone number</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="number"
+                                        value={filters.number}
+                                        onChange={handleInputChange}
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Address</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="address"
+                                        value={filters.address}
+                                        onChange={handleInputChange}
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Keyword</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="keyword"
+                                        value={filters.keyword}
+                                        onChange={handleInputChange}
+                                    />
+                                </Form.Group>
+                                <Button variant="primary" onClick={handleSearch} className="w-100">Search</Button>
+                            </Card.Body>
+                        </Card>
+                    </div>
+                </Col>
+            </Row>
+            <AddContactModal
+                show={showModal}
+                onHide={() => setShowModal(false)}
+                onContactCreated={handleSearch}
+            />
+        </Container>
+    );
+};
+
+export default ListContacts;

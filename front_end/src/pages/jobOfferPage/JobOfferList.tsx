@@ -152,17 +152,19 @@ export default function ListJobOffers() {
 
                 {/* Sidebar Filtri */}
                 <Col md={3}>
-                    <Card>
-                        <Card.Header className="bg-white">
-                            <h5 className="mb-0">Filtri</h5>
-                        </Card.Header>
-                        <Card.Body>
-                            {renderFilterButton("all", "Tutte le offerte")}
-                            {renderFilterButton("open", "Aperte")}
-                            {renderFilterButton("accepted", "Accettate")}
-                            {renderFilterButton("aborted", "Annullate")}
-                        </Card.Body>
-                    </Card>
+                    <div style={{ position: 'sticky', top: '80px' }}>
+                        <Card>
+                            <Card.Header className="bg-white">
+                                <h5 className="mb-0">Filtri</h5>
+                            </Card.Header>
+                            <Card.Body>
+                                {renderFilterButton("all", "Tutte le offerte")}
+                                {renderFilterButton("open", "Aperte")}
+                                {renderFilterButton("accepted", "Accettate")}
+                                {renderFilterButton("aborted", "Annullate")}
+                            </Card.Body>
+                        </Card>
+                    </div>
                 </Col>
             </Row>
         </Container>

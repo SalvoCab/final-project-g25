@@ -27,11 +27,15 @@ class LoginController {
             authentication: Authentication?): Map<String, Any?>{
         val principal: OidcUser?= authentication?.principal as? OidcUser
         val name = principal?.preferredUsername ?: ""
+        val clientRoles = (principal?.attributes?.get("client_roles") as? List<*>)?.filterIsInstance<String>()
+        val rolePriority = listOf("ROLE_manager", "ROLE_operator", "ROLE_guest")
+        val role = rolePriority.find { clientRoles?.contains(it) == true } ?.removePrefix("ROLE_") ?: ""
         return mapOf(
                 "name" to name,
                 "loginUrl" to "/oauth2/authorization/kc1client",
                 "logoutUrl" to "/logout",
                 "principal" to principal,
+                "role" to role,
                 "xsrfToken" to xsrf)
     }
 

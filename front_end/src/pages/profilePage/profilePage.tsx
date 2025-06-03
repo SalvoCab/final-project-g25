@@ -42,7 +42,10 @@ const ProfilePage: React.FC<ProfileProps> = ({ me }) => {
                             <th scope="row">Email</th>
                             <td>{me.principal.email}</td>
                         </tr>
-
+                        <tr>
+                            <th scope="row">Role</th>
+                            <td>{me.role}</td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>

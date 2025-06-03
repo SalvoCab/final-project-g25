@@ -11,6 +11,7 @@ import { Container, Row, Col, Card,Button } from 'react-bootstrap';
 // import EditCandidate from "./components/Candidates/EditCandidate.tsx";
 import AddJobOfferPage from "./pages/jobOfferPage/JobOfferPage";
 import ListJobOffers from "./pages/jobOfferPage/JobOfferList.tsx";
+import ListContacts from "./pages/contactPage/contactPage.tsx"
 
 export interface MeInterface {
     name: string;
@@ -22,6 +23,7 @@ export interface MeInterface {
         familyName: string;
         email: string;
     } | null;
+    role:string;
     xsrfToken: string;
 }
 
@@ -57,6 +59,7 @@ function App() {
                                     <Route path="/profile" element={<ProfilePage me={me} />} />
                                     <Route path="/job-offers" element={<AddJobOfferPage customerId={42} availableSkills={[{ id: 1, name: "Java" }, { id: 2, name: "Kotlin" }]}/>} />
                                     <Route path="/job-offers-list" element={<ListJobOffers/>} />
+                                    <Route path="/contacts" element={<ListContacts me={me}/>} />
                                 </Routes>
                             </Col>
                         </Row>
