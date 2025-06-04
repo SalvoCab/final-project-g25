@@ -30,8 +30,8 @@ function isErrorResponseBody(body: any): body is ErrorResponseBody {
     return body.hasOwnProperty("title") && body.hasOwnProperty("detail");
 }
 
-function getCSRFCookie(): string {
-    return Cookies.get("XSRF-TOKEN")!;
+function getCSRFCookie(): string | undefined {
+    return Cookies.get("XSRF-TOKEN");
 }
 
 export async function customFetch<T>(
@@ -41,9 +41,10 @@ export async function customFetch<T>(
     let res;
     try {
         if (init && init.method !== "GET") {
+            const token = getCSRFCookie();
             init.headers = {
                 ...init.headers,
-                "X-XSRF-TOKEN": getCSRFCookie()!,
+                ...(token && { "X-XSRF-TOKEN": token }),
             };
         }
         res = await fetch(input, init);
@@ -59,11 +60,22 @@ export async function customFetch<T>(
             `Server responded with: ${errorBody.title}`,
             errorBody.fieldErrors,
         );
+    } else if (res.status === 401 || res.status === 403) {
+        throw new ApiError("Unauthorized or forbidden");
     } else {
         const errorBody = (await res.json()) as ErrorResponseBody;
-        const message = `Server responded with ${isErrorResponseBody(errorBody) ? `${errorBody.title}: ${errorBody.detail}` : "Generic error"}`;
+        const message = `Server responded with ${
+            isErrorResponseBody(errorBody)
+                ? `${errorBody.title}: ${errorBody.detail}`
+                : "Generic error"
+        }`;
         throw new ApiError(message);
     }
 }
 
-
+export async function ensureCSRFToken() {
+    const token = getCSRFCookie();
+    if (!token) {
+        await fetch("/me"); // o un endpoint pubblico che setta il token
+    }
+}

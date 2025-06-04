@@ -30,6 +30,7 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
         number: "",
         keyword: ""
     });
+    const [appliedFilters, setAppliedFilters] = useState(filters);
     const [showModal, setShowModal] = useState(false);
     const role = me?.role ?? "";
     const permissions = {
@@ -40,13 +41,13 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
 
     const canAddEdit = permissions.canAddEdit.includes(role);
     const canDelete = permissions.canDelete.includes(role);
-
+    const hasActiveFilters = Object.values(appliedFilters).some(val => val !== "");
 
     useEffect(() => {
         setLoading(true);
         setError(null);
 
-        listContacts({ ...filters, page, limit })
+        listContacts({ ...appliedFilters, page, limit })
             .then((data) => {
                 setContacts(data);
                 setHasMore(data.length === limit);
@@ -56,7 +57,7 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
                 setContacts([]);
             })
             .finally(() => setLoading(false));
-    }, [page, filters]);
+    }, [page, limit, appliedFilters]);
 
     const handleInputChange = (e: React.ChangeEvent<any>) => {
         const { name, value } = e.target;
@@ -64,6 +65,14 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
     };
 
     const handleSearch = () => {
+        setPage(0);
+        setAppliedFilters(filters);
+    };
+
+    const handleClearFilters = () => {
+        const empty = { email: "", address: "", number: "", keyword: "" };
+        setFilters(empty);
+        setAppliedFilters(empty);
         setPage(0);
     };
 
@@ -232,6 +241,9 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
                                     />
                                 </Form.Group>
                                 <Button variant="primary" onClick={handleSearch} className="w-100">Search</Button>
+                                <Button variant="danger" onClick={handleClearFilters} className="w-100 mt-2" disabled={!hasActiveFilters}>
+                                    Remove Filters
+                                </Button>
                             </Card.Body>
                         </Card>
                     </div>

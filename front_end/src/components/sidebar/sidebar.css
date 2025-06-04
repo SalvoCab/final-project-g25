@@ -29,3 +29,20 @@
     font-weight: bold;
     color: #F6F5EC;
 }
+.sidebar-subitem {
+    font-size: 0.9rem!important;
+    padding-left: 24px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    color: #555;
+    margin-top: 1px!important;
+}
+
+.sidebar-subitem .dot {
+    height: 6px;
+    width: 6px;
+    background-color: #555;
+    border-radius: 50%;
+    margin-right: 8px;
+}

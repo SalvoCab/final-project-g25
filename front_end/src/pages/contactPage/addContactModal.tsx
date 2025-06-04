@@ -5,6 +5,7 @@ import { createCustomer } from "../../apis/apiCustomer";
 import { createProfessional } from "../../apis/apiProfessional.tsx";
 import { CreateContactDTO } from "../../objects/Contact";
 import { CreateProfessionalDTO } from "../../objects/Professional.ts";
+import {ensureCSRFToken} from "../../apis/apiUtils.tsx";
 
 interface AddContactModalProps {
     show: boolean;
@@ -42,27 +43,27 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
     const handleSubmit = async () => {
         setLoading(true);
 
-        createContact({ ...contactData })
-            .then((contact) => {
+        try {
+            await ensureCSRFToken(); // <--- assicurati che il token ci sia
 
-                if (category === "professional") {
-                    return createProfessional(contact.id, professionalData).then(() => {});
-                } else if (category === "customer") {
-                    return createCustomer(contact.id, customerNotes).then(() => {});
-                }
-                return Promise.resolve(); // category === "unknown"
-            })
-            .then(() => {
-                onContactCreated(); // Refresh lista
-                onHide(); // Chiudi modal
-            })
-            .catch((error) => {
-                alert("Errore durante la creazione del contatto");
-                console.error(error);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+            const contact = await createContact({ ...contactData });
+
+            if (category === "professional") {
+                await ensureCSRFToken(); // <--- assicurati che il token ci sia
+                await createProfessional(contact.id, professionalData);
+            } else if (category === "customer") {
+                await ensureCSRFToken(); // <--- assicurati che il token ci sia
+                await createCustomer(contact.id, customerNotes);
+            }
+
+            onContactCreated(); // Refresh lista
+            onHide(); // Chiudi modal
+        } catch (error) {
+            alert("Errore durante la creazione del contatto");
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
