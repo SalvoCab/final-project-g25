@@ -26,6 +26,9 @@ const Sidebar: React.FC = () => {
             <NavLink to="/messages" className={({ isActive }) => isActive ? 'active' : ''}>
                 Messages
             </NavLink>
+            <NavLink to="/documents" className={({ isActive }) => isActive ? 'active' : ''}>
+                Documents
+            </NavLink>
             <NavLink to="/analytics" className={({ isActive }) => isActive ? 'active' : ''}>
                 Analytics
             </NavLink>

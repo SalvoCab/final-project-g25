@@ -59,6 +59,8 @@ function App() {
                                     <Route path="/job-offers" element={<AddJobOfferPage customerId={42} availableSkills={[{ id: 1, name: "Java" }, { id: 2, name: "Kotlin" }]}/>} />
                                     <Route path="/job-offers-list" element={<ListJobOffers/>} />
                                     <Route path="/contacts" element={<ListContacts me={me} />} />
+                                    <Route path="/professionals" />
+                                    <Route path="/customers"  />
                                 </Routes>
                             </Col>
                         </Row>

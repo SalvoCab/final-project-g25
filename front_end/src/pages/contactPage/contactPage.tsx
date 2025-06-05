@@ -94,14 +94,12 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
                         <ListGroup variant="flush">
                             <ListGroup.Item style={{ backgroundColor: '#F6F5EC' }}>
                                 <BsPersonBadge className="me-2" />
-                                <strong>Categoria:</strong> {contact.category}
+                                <strong>Category:</strong> {contact.category}
                             </ListGroup.Item >
-                            {contact.ssnCode && (
-                                <ListGroup.Item style={{ backgroundColor: '#F6F5EC' }}>
-                                    <BsPersonVcard className="me-2" />
-                                    <strong>SSN Code:</strong> {contact.ssnCode}
-                                </ListGroup.Item>
-                            )}
+                            <ListGroup.Item style={{ backgroundColor: '#F6F5EC' }}>
+                                <BsPersonVcard className="me-2" />
+                                <strong>SSN Code:</strong> {contact.ssnCode || "None"}
+                            </ListGroup.Item>
                         </ListGroup>
                     </Col>
 

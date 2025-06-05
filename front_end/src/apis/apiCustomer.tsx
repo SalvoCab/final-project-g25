@@ -1,19 +1,7 @@
-import { CustomerDTO } from "../objects/Customer.ts";
+import { CustomerDTO, CustomerDetails } from "../objects/Customer.ts";
 import { customFetch } from "./apiUtils.tsx";
 
-// Dettagli cliente con contatto incluso
-export interface CustomerDetails {
-    id_customer: number;
-    id_contact: number;
-    name: string;
-    surname: string;
-    notes: string | null;
-    category: string;
-    ssn_code: string;
-    emails: string[];
-    addresses: string[];
-    phone_numbers: string[];
-}
+
 
 // List customers (paginati)
 export async function listCustomers(params: {

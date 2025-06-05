@@ -44,7 +44,7 @@ const Navbar: React.FC<NavbarProps> = ({ me }) => {
                                     <Link className="nav-link" to="/job-offers-list">Lista</Link>
                                 </li>
                                 <li className="nav-item nav-link">
-                                    Welcome <b>{me.name}</b>
+                                    Welcome <b>{me.principal.givenName} {me.principal.familyName} <i>({me.name})</i></b>
                                 </li>
                                 <li className="nav-item">
                                     <Link className="btn btn-custom" to="/profile">
