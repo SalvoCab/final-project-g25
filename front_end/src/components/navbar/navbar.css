@@ -37,6 +37,22 @@
 
 .btn-custom-outline:hover {
     color: #ffffff !important;
-    background-color: #14382C !important;
+    background-color: #32564a !important;
+    border-color: #32564a !important;
+}
+
+.btn-custom {
+    color: #F6F5EC !important;
     border-color: #14382C !important;
+    background-color: #14382C !important;
+}
+
+.btn-custom:hover {
+    color: #FFFFFF !important;
+    border-color: #32564a !important;
+    background-color: #32564a !important;
+}
+
+.nav-link {
+    color: #14382C !important;
 }

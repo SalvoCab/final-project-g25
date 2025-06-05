@@ -11,6 +11,7 @@ import {
 } from "react-icons/bs";
 import { MeInterface } from '../../App.tsx';
 import AddContactModal from "./addContactModal.tsx"
+import {ensureCSRFToken} from "../../apis/apiUtils.tsx";
 
 
 interface ListContactsProps {
@@ -51,6 +52,7 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
             .then((data) => {
                 setContacts(data);
                 setHasMore(data.length === limit);
+                ensureCSRFToken();
             })
             .catch((err: any) => {
                 setError(err.message || "Errore durante il caricamento dei contatti");

@@ -29,17 +29,16 @@ export interface MeInterface {
 
 function App() {
     const [me, setMe] = useState<MeInterface | null>(null);
-
+    const fetchMe = async () => {
+        try {
+            const res = await fetch("/me");
+            const meData = (await res.json()) as MeInterface;
+            setMe(meData);
+        } catch (error) {
+            setMe(null);
+        }
+    };
     useEffect(() => {
-        const fetchMe = async () => {
-            try {
-                const res = await fetch("/me");
-                const meData = (await res.json()) as MeInterface;
-                setMe(meData);
-            } catch (error) {
-                setMe(null);
-            }
-        };
         fetchMe();
     }, []);
 
@@ -59,7 +58,7 @@ function App() {
                                     <Route path="/profile" element={<ProfilePage me={me} />} />
                                     <Route path="/job-offers" element={<AddJobOfferPage customerId={42} availableSkills={[{ id: 1, name: "Java" }, { id: 2, name: "Kotlin" }]}/>} />
                                     <Route path="/job-offers-list" element={<ListJobOffers/>} />
-                                    <Route path="/contacts" element={<ListContacts me={me}/>} />
+                                    <Route path="/contacts" element={<ListContacts me={me} />} />
                                 </Routes>
                             </Col>
                         </Row>

@@ -49,10 +49,10 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
             const contact = await createContact({ ...contactData });
 
             if (category === "professional") {
-                await ensureCSRFToken(); // <--- assicurati che il token ci sia
+                await ensureCSRFToken();
                 await createProfessional(contact.id, professionalData);
             } else if (category === "customer") {
-                await ensureCSRFToken(); // <--- assicurati che il token ci sia
+                await ensureCSRFToken();
                 await createCustomer(contact.id, customerNotes);
             }
 

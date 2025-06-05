@@ -4,6 +4,7 @@ import { listJobOffers, listOpenJobOffers, listAcceptedJobOffers, listAbortedJob
 import { Container, Row, Col, Card, Button, Badge, Spinner, Alert } from 'react-bootstrap';
 import { BsClock, BsCash, BsListCheck, BsFileText } from 'react-icons/bs';
 import './JobOfferList.css';
+import {ensureCSRFToken} from "../../apis/apiUtils.tsx";
 
 type FilterType = "all" | "open" | "accepted" | "aborted";
 
@@ -37,7 +38,7 @@ export default function ListJobOffers() {
         };
 
         fetchOffers()
-            .then(setJobOffers)
+            .then((data)=>{setJobOffers(data); ensureCSRFToken()})
             .catch((err: any) => {
                 setError(err.message || "Errore durante il caricamento delle offerte");
                 setJobOffers([]);

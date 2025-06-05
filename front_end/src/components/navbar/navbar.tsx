@@ -1,16 +1,26 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { MeInterface } from '../../App.tsx';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/logo_h.png';
 import './Navbar.css';
-
-
+import Cookies from "js-cookie";
 
 interface NavbarProps {
     me: MeInterface | null;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ me }) => {
+    const logoutFormRef = useRef<HTMLFormElement>(null);
+    const csrfInputRef = useRef<HTMLInputElement>(null);
+
+    const handleLogoutClick = () => {
+        const token = Cookies.get("XSRF-TOKEN");
+        if (csrfInputRef.current) {
+            csrfInputRef.current.value = token || '';
+        }
+        logoutFormRef.current?.submit();
+    };
+
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-custom">
             <div className="container-fluid">
@@ -24,37 +34,52 @@ const Navbar: React.FC<NavbarProps> = ({ me }) => {
                 </Link>
 
                 <div className="collapse navbar-collapse d-flex justify-content-end">
-                    <ul className="navbar-nav ml-auto">
-                        {me && me.principal &&
+                    <ul className="navbar-nav ml-auto d-flex align-items-center gap-3">
+                        {me && me.principal && (
                             <>
                                 <li className="nav-item">
-                                    <form method="post" action={me.logoutUrl}>
-                                        <Link className="nav-link" to="/profile">{me.name}</Link>
-                                        <input type="hidden" name="_csrf" value={me.xsrfToken}/>
-                                        <button type="submit" className="btn btn-custom-outline">Logout</button>
+                                    <Link className="nav-link" to="/job-offers">Vai</Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/job-offers-list">Lista</Link>
+                                </li>
+                                <li className="nav-item nav-link">
+                                    Welcome <b>{me.name}</b>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="btn btn-custom" to="/profile">
+                                        Profile
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <form method="post" action={me.logoutUrl} ref={logoutFormRef} className="mb-0">
+                                        <input type="hidden" name="_csrf" ref={csrfInputRef} />
+                                        <button
+                                            type="button"
+                                            className="btn btn-custom-outline"
+                                            onClick={handleLogoutClick}
+                                        >
+                                            Logout
+                                        </button>
                                     </form>
                                 </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="/job-offers">vai</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="/job-offers-list">lista</Link>
-                                </li>
                             </>
-                        }
-                        {me && me.principal == null && me.loginUrl &&
+                        )}
+                        {me && me.principal == null && me.loginUrl && (
                             <li className="nav-item">
-                                <button className="btn btn-custom-outline"
-                                        onClick={() => window.location.href = me?.loginUrl}>Login
+                                <button
+                                    className="btn btn-custom-outline"
+                                    onClick={() => window.location.href = me.loginUrl}
+                                >
+                                    Login
                                 </button>
                             </li>
-                        }
+                        )}
                     </ul>
-
                 </div>
             </div>
         </nav>
     );
-}
+};
 
 export default Navbar;

@@ -826,10 +826,10 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "A4PGV1WAVvB528I2rCXsY00Bv2JMAERW",
       "redirectUris": [
-        "http://localhost:8080/login/oauth2/code/kc1client"
+        "*"
       ],
       "webOrigins": [
-        "http://localhost:8080"
+        "*"
       ],
       "notBefore": 0,
       "bearerOnly": false,
