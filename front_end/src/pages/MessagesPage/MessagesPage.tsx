@@ -4,6 +4,7 @@ import {
     Container, Row, Col, Card, Spinner, Alert, Button, Form
 } from 'react-bootstrap';
 import {listMessages} from "../../apis/apiMessage.tsx";
+import {ensureCSRFToken} from "../../apis/apiUtils.tsx";
 
 const ListMessages: React.FC = () => {
     const [messages, setMessages] = useState<MessageDTO[]>([]);
@@ -24,6 +25,7 @@ const ListMessages: React.FC = () => {
             .then(data => {
                 setMessages(data);
                 setHasMore(data.length === limit);
+                ensureCSRFToken();
             })
             .catch(err => {
                 setError(err.message || "Errore durante il caricamento dei messaggi");
@@ -89,12 +91,12 @@ const ListMessages: React.FC = () => {
 
                     {!loading && !error && messages.length > 0 && (
                         <div className="d-flex justify-content-between align-items-center mt-4">
-                            <Button variant="outline-primary" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>
-                                Indietro
+                            <Button className="btn-custom-outline" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>
+                                Back
                             </Button>
                             <span>Page {page + 1}</span>
-                            <Button variant="primary" onClick={() => setPage(p => p + 1)} disabled={!hasMore}>
-                                Avanti
+                            <Button className="btn-custom" onClick={() => setPage(p => p + 1)} disabled={!hasMore}>
+                                Next
                             </Button>
                         </div>
                     )}

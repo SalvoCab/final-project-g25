@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "./contactPage.css";
 import { listContacts } from "../../apis/apiContact.tsx";
 import { ContactDTO } from "../../objects/Contact.ts";
 import {
@@ -6,8 +7,8 @@ import {
     Form, ListGroup
 } from 'react-bootstrap';
 import {
-    BsEnvelope, BsGeoAlt, BsPersonBadge,
-    BsPersonVcard, BsTelephone
+    BsEnvelope, BsGeoAlt, BsPencilSquare, BsPersonAdd, BsPersonBadge,
+    BsPersonVcard, BsTelephone, BsTrash
 } from "react-icons/bs";
 import { MeInterface } from '../../App.tsx';
 import AddContactModal from "./addContactModal.tsx"
@@ -78,6 +79,18 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
         setPage(0);
     };
 
+    const getCategoryStyle = (category: string): React.CSSProperties => {
+        switch (category.toLowerCase()) {
+            case "professional":
+                return { backgroundColor: "#d1e7dd", color: "#0f5132", borderRadius: "10px", padding: "2px 8px", display: "inline-block" };
+            case "customer":
+                return { backgroundColor: "#cfd5fc", color: "#052560", borderRadius: "10px", padding: "2px 8px", display: "inline-block" };
+            case "unknown":
+            default:
+                return { backgroundColor: "#f8d7da", color: "#842029", borderRadius: "10px", padding: "2px 8px", display: "inline-block" };
+        }
+    };
+
     const renderContactCard = (contact: ContactDTO) => (
         <Card
             key={contact.id}
@@ -94,8 +107,9 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
                         <ListGroup variant="flush">
                             <ListGroup.Item style={{ backgroundColor: '#F6F5EC' }}>
                                 <BsPersonBadge className="me-2" />
-                                <strong>Category:</strong> {contact.category}
-                            </ListGroup.Item >
+                                <strong>Category:</strong>{' '}
+                                <span style={getCategoryStyle(contact.category)}>{contact.category}</span>
+                            </ListGroup.Item>
                             <ListGroup.Item style={{ backgroundColor: '#F6F5EC' }}>
                                 <BsPersonVcard className="me-2" />
                                 <strong>SSN Code:</strong> {contact.ssnCode || "None"}
@@ -124,8 +138,8 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
                 {/* Azioni visibili in base al ruolo */}
                 {(canAddEdit || canDelete) && (
                     <div className="mt-3 d-flex gap-2">
-                        {canAddEdit && <Button variant="warning">Edit</Button>}
-                        {canDelete && <Button variant="danger">Delete</Button>}
+                        {canAddEdit && <Button variant="warning"><BsPencilSquare /> Edit</Button>}
+                        {canDelete && <Button variant="danger"><BsTrash /> Delete</Button>}
                     </div>
                 )}
             </Card.Body>
@@ -141,7 +155,7 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
 
                     {canAddEdit && (
                         <div className="mb-3">
-                            <Button className="btn-contact-filled" onClick={() => setShowModal(true)} >Add Contact</Button>
+                            <Button className="btn-custom" onClick={() => setShowModal(true)} ><BsPersonAdd /> Add Contact</Button>
                         </div>
                     )}
 
@@ -178,19 +192,19 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
                     {!loading && !error && contacts.length > 0 && (
                         <div className="d-flex justify-content-between align-items-center mt-4">
                             <Button
-                                variant="outline-primary"
+                                className="btn-custom-outline"
                                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                                 disabled={page === 0}
                             >
-                                Indietro
+                                Back
                             </Button>
                             <span>Page {page + 1}</span>
                             <Button
-                                variant="primary"
+                                className="btn-custom"
                                 onClick={() => setPage((p) => p + 1)}
                                 disabled={!hasMore}
                             >
-                                Avanti
+                                Next
                             </Button>
                         </div>
                     )}

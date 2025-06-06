@@ -24,7 +24,7 @@ const Navbar: React.FC<NavbarProps> = ({ me }) => {
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-custom">
             <div className="container-fluid">
-                <Link className="navbar-brand" to="/">
+                <Link className="navbar-brand" to="/ui">
                     <img
                         src={logo}
                         alt="Job Placement Logo"

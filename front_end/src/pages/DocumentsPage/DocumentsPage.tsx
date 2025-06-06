@@ -9,7 +9,7 @@ import {
     deleteDocument
 } from "../../apis/apiDocument";
 import { DocumentMetadataDTO } from "../../objects/Document";
-import {ApiError} from "../../apis/apiUtils.tsx";
+import {ApiError, ensureCSRFToken} from "../../apis/apiUtils.tsx";
 
 const ListDocuments: React.FC = () => {
     const [documents, setDocuments] = useState<DocumentMetadataDTO[]>([]);
@@ -29,6 +29,7 @@ const ListDocuments: React.FC = () => {
             .then((data) => {
                 setDocuments(data);
                 setHasMore(data.length === limit);
+                ensureCSRFToken();
             })
             .catch(() => {
                 setError("Errore durante il caricamento dei documenti.");
@@ -171,19 +172,19 @@ const ListDocuments: React.FC = () => {
 
                     <div className="d-flex justify-content-between align-items-center mt-4">
                         <Button
-                            variant="outline-primary"
+                            className="btn-custom-outline"
                             onClick={() => setPage((p) => Math.max(0, p - 1))}
                             disabled={page === 0}
                         >
-                            Indietro
+                            Back
                         </Button>
                         <span>Pagina {page + 1}</span>
                         <Button
-                            variant="primary"
+                            className="btn-custom"
                             onClick={() => setPage((p) => p + 1)}
                             disabled={!hasMore}
                         >
-                            Avanti
+                            Next
                         </Button>
                     </div>
                 </>

@@ -11,6 +11,7 @@ import ListContacts from "./pages/contactPage/contactPage.tsx";
 import ContactUsPage from "./pages/ContactUsPage/ContactUsPage.tsx";
 import ListMessages from "./pages/MessagesPage/MessagesPage.tsx";
 import ListDocuments from "./pages/DocumentsPage/DocumentsPage.tsx";
+import ListProfessionals from "./pages/professionalPage/professionalPage.tsx";
 
 export interface MeInterface {
     name: string;
@@ -140,7 +141,7 @@ function App() {
                                     <Route path="/job-offers" element={<AddJobOfferPage customerId={42} availableSkills={[{ id: 1, name: "Java" }, { id: 2, name: "Kotlin" }]} />} />
                                     <Route path="/job-offers-list" element={<ListJobOffers />} />
                                     <Route path="/contacts" element={<ListContacts me={me} />} />
-                                    <Route path="/professionals" />
+                                    <Route path="/professionals" element={<ListProfessionals me={me} />}/>
                                     <Route path="/customers" />
                                     <Route path="/messages" element={<ListMessages/>}/>
                                     <Route path="/documents" element={<ListDocuments/>}/>
