@@ -1,4 +1,4 @@
-import { customFetch } from "./apiUtils.tsx";
+import {customFetch, customFetchDoc, ensureCSRFToken} from "./apiUtils.tsx";
 import {DocumentMetadataDTO} from "../objects/Document.ts";
 
 
@@ -21,9 +21,10 @@ export async function getDocumentDetails(id: number): Promise<DocumentMetadataDT
 
 // Upload nuovo documento
 export async function uploadDocument(file: File): Promise<DocumentMetadataDTO> {
+    await ensureCSRFToken();
     const formData = new FormData();
-    formData.append("file", file);
-    return customFetch(`/ds/documents`, {
+    formData.append("documento", file);
+    return customFetchDoc(`/ds/documents`, {
         method: "POST",
         body: formData,
     });

@@ -11,7 +11,7 @@
 .btn-contact-filled {
     background-color: #14382C !important;
     border: 2px solid #14382C !important;
-    color: white !important;
+    color: #F6F5EC !important;
     padding: 12px 30px !important;
     font-size: 1.2rem !important;
     transition: none !important;
@@ -21,12 +21,11 @@
 .btn-contact-filled:hover,
 .btn-contact-filled:focus,
 .btn-contact-filled:active {
-    background-color: #14382C !important;
-    border-color: #14382C !important;
+    background-color: #32564a !important;
+    border-color: #32564a !important;
     color: white !important;
     box-shadow: none !important;
 }
-
 
 
 .process-step {

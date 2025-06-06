@@ -28,7 +28,7 @@ const Navbar: React.FC<NavbarProps> = ({ me }) => {
                     <img
                         src={logo}
                         alt="Job Placement Logo"
-                        height="40"
+                        height="50"
                         className="d-inline-block align-top"
                     />
                 </Link>

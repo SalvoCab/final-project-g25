@@ -73,6 +73,56 @@ export async function customFetch<T>(
     }
 }
 
+export async function customFetchDoc<T>(
+    input: RequestInfo | URL,
+    init?: RequestInit,
+): Promise<T> {
+    let res;
+    try {
+        const isFormData = init?.body instanceof FormData;
+
+        if (init && init.method !== "GET") {
+            const token = getCSRFCookie();
+
+            if (!isFormData) {
+                init.headers = {
+                    ...init.headers,
+                    ...(token && { "X-XSRF-TOKEN": token }),
+                    "Content-Type": "application/json", // solo se non è FormData
+                };
+            } else {
+                init.headers = {
+                    ...(token && { "X-XSRF-TOKEN": token }),
+                };
+            }
+        }
+
+        res = await fetch(input, init);
+    } catch {
+        throw new ApiError("Could not connect to the API server");
+    }
+
+    if (res.ok) {
+        return res.json().catch(() => {});
+    } else if (res.status === 422) {
+        const errorBody = (await res.json()) as UnprocessableEntityResponseBody;
+        throw new ApiError(
+            `Server responded with: ${errorBody.title}`,
+            errorBody.fieldErrors,
+        );
+    } else if (res.status === 401 || res.status === 403) {
+        throw new ApiError("Unauthorized or forbidden");
+    } else {
+        const errorBody = (await res.json()) as ErrorResponseBody;
+        const message = `Server responded with ${
+            isErrorResponseBody(errorBody)
+                ? `${errorBody.title}: ${errorBody.detail}`
+                : "Generic error"
+        }`;
+        throw new ApiError(message);
+    }
+}
+
 export async function ensureCSRFToken() {
     const token = getCSRFCookie();
     if (!token) {

@@ -15,17 +15,18 @@ import java.time.LocalDateTime
 @RequestMapping("/documents")
 class DocumentController(private val documentService: DocumentService, private val documentContentService: DocumentContentService) {
     private val logger = LoggerFactory.getLogger(DocumentController::class.java)
-    @PostMapping("/","")
-    fun uploadDocument(@RequestParam("file") file: MultipartFile): ResponseEntity<Any> {
-        val found = documentService.findByName(file.originalFilename?:"")
-        if(found.isNotEmpty() || file.originalFilename=="") {
-            throw DuplicateDocumentException("The document with name ${file.originalFilename} already exist.")
+    @PostMapping(consumes = ["multipart/form-data"])
+    fun uploadDocument(@RequestParam(value = "documento") documento: MultipartFile): ResponseEntity<Any> {
+
+        val found = documentService.findByName(documento.originalFilename?:"")
+        if(found.isNotEmpty() || documento.originalFilename=="") {
+            throw DuplicateDocumentException("The document with name ${documento.originalFilename} already exist.")
         }else {
             val savedDocument = documentService.saveDocument(
-                    name = file.originalFilename ?: "",
-                    size = file.size,
-                    contentType = file.contentType ?: "",
-                    content = file.bytes
+                    name = documento.originalFilename ?: "",
+                    size = documento.size,
+                    contentType = documento.contentType ?: "",
+                    content = documento.bytes
             )
             logger.info("Document name: ${savedDocument.name} with ID: ${savedDocument.getId()} uploaded successfully")
             return ResponseEntity.ok(savedDocument.toDto())
