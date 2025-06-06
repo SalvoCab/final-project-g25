@@ -38,7 +38,6 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
     const [customerNotes, setCustomerNotes] = useState<string | null>("");
 
     const [availableSkills, setAvailableSkills] = useState<SkillDTO[]>([]);
-    const [selectedSkillIds, setSelectedSkillIds] = useState<number[]>([]);
     const [newSkillName, setNewSkillName] = useState("");
 
     const [loading, setLoading] = useState(false);
@@ -49,18 +48,11 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
                 const skills = await listAllSkills();
                 setAvailableSkills(skills);
             } catch (error) {
-                console.error("Errore nel caricamento delle competenze:", error);
+                console.error("Error in loading skills:", error);
             }
         };
         fetchSkills();
     }, []);
-
-    useEffect(() => {
-        setProfessionalData((prev) => ({
-            ...prev,
-            skills: selectedSkillIds,
-        }));
-    }, [selectedSkillIds]);
 
     const handleContactChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -81,10 +73,7 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
 
             if (category === "professional") {
                 await ensureCSRFToken();
-                await createProfessional(contact.id, {
-                    ...professionalData,
-                    skills: selectedSkillIds,
-                });
+                await createProfessional(contact.id,professionalData);
             } else if (category === "customer") {
                 await ensureCSRFToken();
                 await createCustomer(contact.id, customerNotes);
@@ -93,7 +82,7 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
             onContactCreated();
             onHide();
         } catch (error) {
-            alert("Errore durante la creazione del contatto");
+            alert("Error in creating contact");
             console.error(error);
         } finally {
             setLoading(false);
@@ -190,10 +179,13 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
                                             try {
                                                 const newSkill = await createSkill(newSkillName.trim());
                                                 setAvailableSkills((prev) => [...prev, newSkill]);
-                                                setSelectedSkillIds((prev) => [...prev, newSkill.id!]);
+                                                setProfessionalData((prev) => ({
+                                                    ...prev,
+                                                    skills: [...(prev.skills ?? []), newSkill.id!],
+                                                }));
                                                 setNewSkillName("");
                                             } catch (error) {
-                                                console.error("Errore nella creazione della competenza:", error);
+                                                console.error("Error creating skill:", error);
                                             }
                                         }}>Add skill</Button>
                                     </Form.Group>
@@ -204,7 +196,7 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
 
                     {category === "customer" && (
                         <Form.Group className="mb-3">
-                            <Form.Label>Note Cliente</Form.Label>
+                            <Form.Label>Customer Notes</Form.Label>
                             <Form.Control as="textarea" rows={3} value={customerNotes ?? ""} onChange={(e) => setCustomerNotes(e.target.value)} />
                         </Form.Group>
                     )}
@@ -215,18 +207,18 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Indirizzo/i</Form.Label>
+                        <Form.Label>Address(es)</Form.Label>
                         <Form.Control placeholder="Via Roma 1, Via Verdi 2" onChange={(e) => setContactData((prev) => ({ ...prev, addresses: e.target.value.split(',').map((x) => x.trim()) }))} />
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Numero/i di Telefono</Form.Label>
+                        <Form.Label>Phone Number(s)</Form.Label>
                         <Form.Control placeholder="123456, 7891011" onChange={(e) => setContactData((prev) => ({ ...prev, phoneNumbers: e.target.value.split(',').map((x) => x.trim()) }))} />
                     </Form.Group>
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={onHide}>Annulla</Button>
+                <Button variant="secondary" onClick={onHide}>Cancel</Button>
                 <Button variant="primary" onClick={handleSubmit} disabled={loading}>
                     {loading ? "Saving..." : "Save"}
                 </Button>

@@ -28,9 +28,10 @@ export async function createSkill(skill: string): Promise<SkillDTO> {
     return customFetch(`/crm/skills`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(skill),
+        body: skill
     });
 }
+
 
 // Aggiorna il nome di una skill
 export async function updateSkill(skillId: number, newSkillName: string): Promise<{
