@@ -120,7 +120,7 @@ const ListDocuments: React.FC = () => {
 
             <Form.Group controlId="formFile" className="mb-3">
                 <Form.Label>Carica nuovo documento</Form.Label>
-                <Form.Control type="file" onChange={handleFileUpload} disabled={uploading} />
+                <Form.Control type="file" name="document" onChange={handleFileUpload} disabled={uploading} />
             </Form.Group>
 
             {loading && (

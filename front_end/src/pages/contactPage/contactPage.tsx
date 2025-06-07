@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import "./contactPage.css";
-import { listContacts } from "../../apis/apiContact.tsx";
+import {deleteContact, listContacts} from "../../apis/apiContact.tsx";
 import { ContactDTO } from "../../objects/Contact.ts";
 import {
     Container, Row, Col, Card, Button, Spinner, Alert,
-    Form, ListGroup
+    Form, ListGroup, Modal
 } from 'react-bootstrap';
 import {
     BsEnvelope, BsGeoAlt, BsPencilSquare, BsPersonAdd, BsPersonBadge,
@@ -32,6 +32,8 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
         number: "",
         keyword: ""
     });
+    const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
+    const [contactToDelete, setContactToDelete] = useState<number | null>(null);
     const [appliedFilters, setAppliedFilters] = useState(filters);
     const [showModal, setShowModal] = useState(false);
     const role = me?.role ?? "";
@@ -44,6 +46,10 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
     const canAddEdit = permissions.canAddEdit.includes(role);
     const canDelete = permissions.canDelete.includes(role);
     const hasActiveFilters = Object.values(appliedFilters).some(val => val !== "");
+    const handleDeleteClick = (contactId: number) => {
+        setContactToDelete(contactId);
+        setConfirmDeleteVisible(true);
+    };
 
     useEffect(() => {
         setLoading(true);
@@ -72,11 +78,42 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
         setAppliedFilters(filters);
     };
 
+    const reloadContacts = () => {
+        setPage(0);
+        setLoading(true);
+        setError(null);
+        listContacts({ ...appliedFilters, page, limit })
+            .then((data) => {
+                setContacts(data);
+                setHasMore(data.length === limit);
+                ensureCSRFToken();
+            })
+            .catch((err: any) => {
+                setError(err.message || "Errore durante il caricamento dei contatti");
+                setContacts([]);
+            })
+            .finally(() => setLoading(false));
+    }
+
     const handleClearFilters = () => {
         const empty = { email: "", address: "", number: "", keyword: "" };
         setFilters(empty);
         setAppliedFilters(empty);
         setPage(0);
+    };
+
+    const confirmDelete = async () => {
+        if (contactToDelete == null) return;
+        try {
+            await deleteContact(contactToDelete);
+            setContacts(prev => prev.filter(c => c.id !== contactToDelete));
+            await ensureCSRFToken();
+        } catch (error) {
+            alert("Failed to delete the contact.");
+        } finally {
+            setConfirmDeleteVisible(false);
+            setContactToDelete(null);
+        }
     };
 
     const getCategoryStyle = (category: string): React.CSSProperties => {
@@ -139,7 +176,11 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
                 {(canAddEdit || canDelete) && (
                     <div className="mt-3 d-flex gap-2">
                         {canAddEdit && <Button variant="warning"><BsPencilSquare /> Edit</Button>}
-                        {canDelete && <Button variant="danger"><BsTrash /> Delete</Button>}
+                        {canDelete && (
+                            <Button variant="danger" onClick={() => handleDeleteClick(contact.id)}>
+                                <BsTrash /> Delete
+                            </Button>
+                        )}
                     </div>
                 )}
             </Card.Body>
@@ -266,8 +307,25 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
             <AddContactModal
                 show={showModal}
                 onHide={() => setShowModal(false)}
-                onContactCreated={handleSearch}
+                onContactCreated={reloadContacts}
             />
+            <Modal show={confirmDeleteVisible} onHide={() => setConfirmDeleteVisible(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Deletion</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure you want to delete the contact?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setConfirmDeleteVisible(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="danger" onClick={confirmDelete}>
+                        Delete
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
         </Container>
     );
 };

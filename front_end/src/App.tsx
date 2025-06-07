@@ -12,6 +12,7 @@ import ContactUsPage from "./pages/ContactUsPage/ContactUsPage.tsx";
 import ListMessages from "./pages/MessagesPage/MessagesPage.tsx";
 import ListDocuments from "./pages/DocumentsPage/DocumentsPage.tsx";
 import ListProfessionals from "./pages/professionalPage/professionalPage.tsx";
+import ListCustomers from "./pages/customerPage/customerPage.tsx";
 
 export interface MeInterface {
     name: string;
@@ -142,7 +143,7 @@ function App() {
                                     <Route path="/job-offers-list" element={<ListJobOffers />} />
                                     <Route path="/contacts" element={<ListContacts me={me} />} />
                                     <Route path="/professionals" element={<ListProfessionals me={me} />}/>
-                                    <Route path="/customers" />
+                                    <Route path="/customers" element={<ListCustomers me={me} />}/>
                                     <Route path="/messages" element={<ListMessages/>}/>
                                     <Route path="/documents" element={<ListDocuments/>}/>
                                 </Routes>

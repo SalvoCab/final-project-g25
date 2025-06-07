@@ -184,6 +184,7 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
                                                     skills: [...(prev.skills ?? []), newSkill.id!],
                                                 }));
                                                 setNewSkillName("");
+                                                await ensureCSRFToken();
                                             } catch (error) {
                                                 console.error("Error creating skill:", error);
                                             }

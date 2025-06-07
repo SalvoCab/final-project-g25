@@ -6,7 +6,7 @@ export interface CreateProfessionalDTO {
 }
 
 export interface ProfessionalDTO {
-    id: number | null;
+    id: number;
     name: string;
     surname: string;
     location: string;

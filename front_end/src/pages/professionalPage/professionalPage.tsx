@@ -10,7 +10,7 @@ import {
     BsCashStack,
     BsPersonDown
 } from "react-icons/bs";
-import { listProfessionals } from "../../apis/apiProfessional";
+import {deleteProfessional, deleteProfessionalAndContact, listProfessionals} from "../../apis/apiProfessional";
 import { ProfessionalDTO, ProfessionalDetails } from "../../objects/Professional";
 import { getProfessionalDetails } from "../../apis/apiProfessional.tsx";
 import { MeInterface } from "../../App";
@@ -51,8 +51,15 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
 
     const [selectedProfessional, setSelectedProfessional] = useState<ProfessionalDetails | null>(null);
     const [showModal, setShowModal] = useState(false);
-
+    const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+    const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
+    const [confirmMessage, setConfirmMessage] = useState("");
     const hasActiveFilters = Object.values(appliedFilters).some(val => val !== "");
+    const showConfirmation = (message: string, onConfirm: () => void) => {
+        setConfirmMessage(message);
+        setConfirmAction(() => onConfirm);
+        setConfirmModalVisible(true);
+    };
 
     useEffect(() => {
         setLoading(true);
@@ -113,10 +120,33 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
         if (!id) return;
         getProfessionalDetails(id)
             .then(details => {
+                ensureCSRFToken();
                 setSelectedProfessional(details);
                 setShowModal(true);
             })
             .catch(() => setSelectedProfessional(null));
+    };
+
+    const handleDelete = (professionalId: number) => {
+        showConfirmation("Are you sure you want to delete the contact?", async () => {
+            try {
+                await deleteProfessionalAndContact(professionalId);
+                setProfessionals((prev) => prev.filter(p => p.id !== professionalId));
+            } catch (error) {
+                alert("Failed to delete the contact.");
+            }
+        });
+    };
+
+    const handleDowngrade = (professionalId: number) => {
+        showConfirmation("Are you sure you want to downgrade as unknown this professional?", async () => {
+            try {
+                await deleteProfessional(professionalId);
+                setProfessionals((prev) => prev.filter(p => p.id !== professionalId));
+            } catch (error) {
+                alert("Failed to downgrade the professional.");
+            }
+        });
     };
 
     const renderProfessionalCard = (prof: ProfessionalDTO) => (
@@ -151,8 +181,16 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
                     <div className="mt-3 d-flex justify-content-between align-items-center">
                         <div className="d-flex gap-2">
                             {canAddEdit && <Button variant="warning"><BsPencilSquare /> Edit</Button>}
-                            {canDelete && <Button variant="danger"><BsPersonDown /> Downgrade as unknown</Button>}
-                            {canDelete && <Button variant="danger"><BsTrash /> Delete</Button>}
+                            {canDelete && (
+                                <>
+                                    <Button variant="danger" onClick={() => handleDowngrade(prof.id)}>
+                                        <BsPersonDown /> Downgrade as unknown
+                                    </Button>
+                                    <Button variant="danger" onClick={() => handleDelete(prof.id)}>
+                                        <BsTrash /> Delete
+                                    </Button>
+                                </>
+                            )}
                         </div>
                         <div>
                             <Button className="btn-custom" onClick={() => handleView(prof.id)}>
@@ -286,6 +324,25 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
                         <p>Loading details...</p>
                     )}
                 </Modal.Body>
+            </Modal>
+            <Modal show={confirmModalVisible} onHide={() => setConfirmModalVisible(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Action</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>{confirmMessage}</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setConfirmModalVisible(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="danger" onClick={() => {
+                        setConfirmModalVisible(false);
+                        confirmAction();
+                    }}>
+                        Delete
+                    </Button>
+                </Modal.Footer>
             </Modal>
         </Container>
     );

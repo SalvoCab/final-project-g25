@@ -1,5 +1,5 @@
 export interface CustomerDTO {
-    id: number | null;
+    id: number;
     name: string;
     surname: string;
     notes: string | null;

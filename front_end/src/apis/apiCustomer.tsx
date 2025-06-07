@@ -25,7 +25,7 @@ export async function createCustomer(contactId: number, notes: string | null): P
     return customFetch(`/crm/customers/${contactId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(notes),
+        body: notes
     });
 }
 
@@ -34,7 +34,7 @@ export async function updateCustomer(customerId: number, notes: string | null): 
     return customFetch(`/crm/customers/${customerId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(notes),
+        body: notes
     });
 }
 
