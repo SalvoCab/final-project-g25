@@ -17,8 +17,6 @@ import org.springframework.security.oauth2.jwt.JwtClaimNames
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
 import java.util.stream.Collectors
@@ -32,8 +30,8 @@ class SecurityConfig(private val jwtAuthConverter: JwtAuthConverter) {
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         return http.authorizeHttpRequests {
             it.requestMatchers(HttpMethod.GET, "/documents/**").hasAnyAuthority("ROLE_manager","ROLE_guest","ROLE_operator")
-                    .requestMatchers(HttpMethod.POST, "/documents/**").hasAnyAuthority("ROLE_manager","ROLE_operator")
-                    .requestMatchers(HttpMethod.PUT, "/documents/**").hasAnyAuthority("ROLE_manager","ROLE_operator")
+                    .requestMatchers(HttpMethod.POST, "/documents/**").permitAll()
+                    .requestMatchers(HttpMethod.PUT, "/documents/**").permitAll()
                     .requestMatchers(HttpMethod.DELETE, "/documents/**").hasAuthority("ROLE_manager")
                     .anyRequest().denyAll()
         }
@@ -43,10 +41,8 @@ class SecurityConfig(private val jwtAuthConverter: JwtAuthConverter) {
                     }
                 }
                 .sessionManagement { it.sessionCreationPolicy( SessionCreationPolicy.STATELESS) }
-                .csrf { it.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                    it.csrfTokenRequestHandler(SpaCsrfTokenRequestHandler()) }
+                .csrf { it.disable() }
                 .cors { it.disable() }
-                .addFilterAfter(CsrfCookieFilter(), BasicAuthenticationFilter::class.java)
                 .build()
     }
 }

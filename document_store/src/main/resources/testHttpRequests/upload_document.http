@@ -1,6 +1,7 @@
 //if done the first time we expect to receive an OK response
 //if done another time we will receive The document with name Lab1.pdf already exist. with error code 409 (DuplicateDocumentException)
-POST /ds/documents/ HTTP/1.1
+# @no-cookie-jar
+POST /ds/documents HTTP/1.1
 Host: localhost:8080
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 

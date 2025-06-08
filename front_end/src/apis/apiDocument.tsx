@@ -23,8 +23,8 @@ export async function getDocumentDetails(id: number): Promise<DocumentMetadataDT
 export async function uploadDocument(file: File): Promise<DocumentMetadataDTO> {
     await ensureCSRFToken();
     const formData = new FormData();
-    formData.append("documento", file);
-    return customFetchDoc(`/ds/documents`, {
+    formData.append("file", file, file.name);
+    return customFetchDoc(`/upload/document`, {
         method: "POST",
         body: formData,
     });

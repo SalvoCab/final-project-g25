@@ -3,35 +3,38 @@ import com.example.document_store.dtos.DocumentMetadataDTO
 import com.example.document_store.dtos.toDto
 import com.example.document_store.services.DocumentContentService
 import com.example.document_store.services.DocumentService
+import jakarta.servlet.annotation.MultipartConfig
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.slf4j.LoggerFactory
+import org.springframework.http.MediaType
 import java.time.LocalDateTime
-
+@MultipartConfig
 @RestController
 @RequestMapping("/documents")
 class DocumentController(private val documentService: DocumentService, private val documentContentService: DocumentContentService) {
     private val logger = LoggerFactory.getLogger(DocumentController::class.java)
-    @PostMapping(consumes = ["multipart/form-data"])
-    fun uploadDocument(@RequestParam(value = "documento") documento: MultipartFile): ResponseEntity<Any> {
 
-        val found = documentService.findByName(documento.originalFilename?:"")
-        if(found.isNotEmpty() || documento.originalFilename=="") {
-            throw DuplicateDocumentException("The document with name ${documento.originalFilename} already exist.")
-        }else {
+    @PostMapping( consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun uploadDocument(@RequestPart("file") file: MultipartFile): ResponseEntity<Any> {
+        val found = documentService.findByName(file.originalFilename ?: "")
+        if (found.isNotEmpty() || file.originalFilename == "") {
+            throw DuplicateDocumentException("The document with name ${file.originalFilename} already exist.")
+        } else {
             val savedDocument = documentService.saveDocument(
-                    name = documento.originalFilename ?: "",
-                    size = documento.size,
-                    contentType = documento.contentType ?: "",
-                    content = documento.bytes
+                name = file.originalFilename ?: "",
+                size = file.size,
+                contentType = file.contentType ?: "",
+                content = file.bytes
             )
             logger.info("Document name: ${savedDocument.name} with ID: ${savedDocument.getId()} uploaded successfully")
             return ResponseEntity.ok(savedDocument.toDto())
-            }
+        }
     }
+
 
     @GetMapping("/","")
     @ResponseStatus(HttpStatus.OK)
