@@ -59,3 +59,11 @@ export async function deleteDocument(id: number): Promise<{
         method: "DELETE",
     });
 }
+
+export async function updateDocumentName(id: number, name: string): Promise<DocumentMetadataDTO> {
+    return customFetch(`/ds/documents/${id}/name`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: name
+    });
+}

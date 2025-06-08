@@ -6,12 +6,18 @@ import {
     listDocuments,
     uploadDocument,
     downloadDocument,
-    deleteDocument
+    deleteDocument, updateDocumentName
 } from "../../apis/apiDocument";
 import { DocumentMetadataDTO } from "../../objects/Document";
 import {ApiError, ensureCSRFToken} from "../../apis/apiUtils.tsx";
+import {BsCloudDownload, BsEye, BsPencilSquare, BsTrash} from "react-icons/bs";
+import {MeInterface} from "../../App.tsx";
 
-const ListDocuments: React.FC = () => {
+interface ListDocumentsProps {
+    me: MeInterface | null;
+}
+
+const ListDocuments: React.FC<ListDocumentsProps> = ({ me }) => {
     const [documents, setDocuments] = useState<DocumentMetadataDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -20,6 +26,17 @@ const ListDocuments: React.FC = () => {
     const [hasMore, setHasMore] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [previewDoc, setPreviewDoc] = useState<{ url: string, type: string } | null>(null);
+    const [editingDocId, setEditingDocId] = useState<number | null>(null);
+    const [editedName, setEditedName] = useState<string>("");
+    const role = me?.role ?? "";
+    const permissions = {
+        canView: ["manager", "operator", "guest"],
+        canAddEdit: ["manager", "operator"],
+        canDelete: ["manager"]
+    };
+
+    const canAddEdit = permissions.canAddEdit.includes(role);
+    const canDelete = permissions.canDelete.includes(role);
 
     useEffect(() => {
         setLoading(true);
@@ -45,6 +62,12 @@ const ListDocuments: React.FC = () => {
         try {
             await uploadDocument(file);
             setPage(0); // Ricarica da inizio
+            await listDocuments({ page, limit })
+                .then((data) => {
+                    setDocuments(data);
+                    setHasMore(data.length === limit);
+                    ensureCSRFToken();
+                })
         } catch (error) {
             if (error instanceof ApiError) {
                 console.error("Upload failed:", error.message, error.fieldErrors);
@@ -100,6 +123,33 @@ const ListDocuments: React.FC = () => {
         }
     };
 
+    const startEditing = (doc: DocumentMetadataDTO) => {
+        setEditingDocId(doc.id!);
+        setEditedName(doc.name);
+    };
+
+    const saveEditedName = async () => {
+        if (editingDocId == null || editedName.trim() === "") return;
+
+        try {
+            const updated = await updateDocumentName(editingDocId, editedName);
+            setDocuments(prev =>
+                prev.map(doc => doc.id === editingDocId ? { ...doc, name: updated.name } : doc)
+            );
+            setEditingDocId(null);
+            setEditedName("");
+            await ensureCSRFToken();
+        } catch {
+            alert("Errore durante il salvataggio del nome.");
+        }
+    };
+
+    const cancelEditing = () => {
+        setEditingDocId(null);
+        setEditedName("");
+    };
+
+
     return (
         <Container className="py-4">
             <h2 className="mb-4">Gestione Documenti</h2>
@@ -117,12 +167,12 @@ const ListDocuments: React.FC = () => {
                     </Form.Select>
                 </Col>
             </Form.Group>
-
-            <Form.Group controlId="formFile" className="mb-3">
-                <Form.Label>Carica nuovo documento</Form.Label>
-                <Form.Control type="file" name="file" onChange={handleFileUpload} disabled={uploading} />
-            </Form.Group>
-
+            {canAddEdit && (
+                <Form.Group controlId="formFile" className="mb-3">
+                    <Form.Label>Load new document</Form.Label>
+                    <Form.Control type="file" name="file" onChange={handleFileUpload} disabled={uploading} />
+                </Form.Group>
+            )}
             {loading && (
                 <div className="text-center py-5">
                     <Spinner animation="border" />
@@ -132,7 +182,7 @@ const ListDocuments: React.FC = () => {
             {error && <Alert variant="danger">{error}</Alert>}
 
             {!loading && !error && documents.length === 0 && (
-                <Alert variant="info">Nessun documento trovato.</Alert>
+                <Alert variant="info">No documents found.</Alert>
             )}
 
             {!loading && !error && documents.length > 0 && (
@@ -140,30 +190,65 @@ const ListDocuments: React.FC = () => {
                     <Table striped bordered hover>
                         <thead>
                         <tr>
-                            <th>Nome</th>
-                            <th>Tipo</th>
-                            <th>Dimensione (KB)</th>
-                            <th>Creato il</th>
-                            <th>Azioni</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Dimension (KB)</th>
+                            <th>Created on</th>
+                            <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody>
                         {documents.map((doc) => (
                             <tr key={doc.id}>
-                                <td>{doc.name}</td>
+                                <td title={doc.name}>
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        {editingDocId === doc.id ? (
+                                            <>
+                                                <Form.Control
+                                                    size="sm"
+                                                    type="text"
+                                                    value={editedName}
+                                                    onChange={(e) => setEditedName(e.target.value)}
+                                                    className="me-2"
+                                                />
+                                                <div className="btn-group">
+                                                    <Button size="sm" variant="success" onClick={saveEditedName}>Save</Button>
+                                                    <Button size="sm" variant="secondary" onClick={cancelEditing}>Cancel</Button>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                            <span>
+                                                {doc.name.length > 30 ? doc.name.slice(0, 30) + "..." : doc.name}
+                                            </span>
+                                                {canAddEdit && (
+                                                    <Button
+                                                        size="sm"
+                                                        className="btn-custom-outline"
+                                                        onClick={() => startEditing(doc)}
+                                                    >
+                                                        <BsPencilSquare /> Edit
+                                                    </Button>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                </td>
                                 <td>{doc.contentType}</td>
                                 <td>{(doc.size / 1024).toFixed(2)}</td>
                                 <td>{doc.createdOn?.split("T")[0]}</td>
                                 <td>
-                                    <Button variant="info" size="sm" onClick={() => handlePreview(doc.id!, doc.contentType)}>
-                                        Anteprima
+                                    <Button variant="outline-dark" size="sm" onClick={() => handlePreview(doc.id!, doc.contentType)}>
+                                        <BsEye /> View
                                     </Button>{" "}
-                                    <Button variant="success" size="sm" onClick={() => handleDownload(doc.id!, doc.name)}>
-                                        Scarica
+                                    <Button className="btn-custom" size="sm" onClick={() => handleDownload(doc.id!, doc.name)}>
+                                        <BsCloudDownload /> Download
                                     </Button>{" "}
-                                    <Button variant="danger" size="sm" onClick={() => handleDelete(doc.id!)}>
-                                        Elimina
-                                    </Button>
+                                    {canDelete && (
+                                        <Button variant="danger" size="sm" onClick={() => handleDelete(doc.id!)}>
+                                                <BsTrash /> Delete
+                                        </Button>
+                                    )}
                                 </td>
                             </tr>
                         ))}
@@ -178,7 +263,7 @@ const ListDocuments: React.FC = () => {
                         >
                             Back
                         </Button>
-                        <span>Pagina {page + 1}</span>
+                        <span>Page {page + 1}</span>
                         <Button
                             className="btn-custom"
                             onClick={() => setPage((p) => p + 1)}

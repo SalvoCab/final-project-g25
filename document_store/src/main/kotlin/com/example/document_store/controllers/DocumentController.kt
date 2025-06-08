@@ -3,7 +3,6 @@ import com.example.document_store.dtos.DocumentMetadataDTO
 import com.example.document_store.dtos.toDto
 import com.example.document_store.services.DocumentContentService
 import com.example.document_store.services.DocumentService
-import jakarta.servlet.annotation.MultipartConfig
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -12,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import java.time.LocalDateTime
-@MultipartConfig
+
 @RestController
 @RequestMapping("/documents")
 class DocumentController(private val documentService: DocumentService, private val documentContentService: DocumentContentService) {
@@ -34,7 +33,6 @@ class DocumentController(private val documentService: DocumentService, private v
             return ResponseEntity.ok(savedDocument.toDto())
         }
     }
-
 
     @GetMapping("/","")
     @ResponseStatus(HttpStatus.OK)
@@ -86,6 +84,20 @@ class DocumentController(private val documentService: DocumentService, private v
         )
         val documentModified = documentService.updateDocument(newDocument, file.bytes).toDto()
         logger.info("Document with ID '$metadataId' and name '${newDocument.name}' uploaded successfully")
+        return ResponseEntity.ok(documentModified)
+    }
+
+    @PutMapping("/{metadataId}/name")
+    fun updateName(@PathVariable metadataId: Long,@RequestBody name: String): ResponseEntity<Any> {
+        val found = documentService.findByName(name)
+        if (found.isNotEmpty()) {
+            val oldDocument = found.find { it.getId() == metadataId }
+            if (oldDocument  == null){
+                throw DuplicateDocumentException("The document with name ${name} already exist.")
+            }
+        }
+        val documentModified = documentService.updateDocument(metadataId,name).toDto()
+        logger.info("Document with ID '$metadataId' and name '${name}' uploaded successfully")
         return ResponseEntity.ok(documentModified)
     }
 }

@@ -145,7 +145,7 @@ function App() {
                                     <Route path="/professionals" element={<ListProfessionals me={me} />}/>
                                     <Route path="/customers" element={<ListCustomers me={me} />}/>
                                     <Route path="/messages" element={<ListMessages/>}/>
-                                    <Route path="/documents" element={<ListDocuments/>}/>
+                                    <Route path="/documents" element={<ListDocuments me={me}/>}/>
                                 </Routes>
                             </Col>
                         </Row>

@@ -65,4 +65,10 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository) : 
         return documentRepository.save(documentMetadata)
 
     }
+
+    override fun updateDocument(id: Long, name: String): DocumentMetadata {
+        val documentMetadata = findById(id)
+        documentMetadata.name = name
+        return documentRepository.save(documentMetadata)
+    }
 }

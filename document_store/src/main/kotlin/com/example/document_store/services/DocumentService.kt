@@ -18,4 +18,5 @@ interface DocumentService {
 
     fun updateDocument(newDocumentMetadata: DocumentMetadataDTO, content:ByteArray): DocumentMetadata
 
+    fun updateDocument(id: Long, name: String): DocumentMetadata
 }
