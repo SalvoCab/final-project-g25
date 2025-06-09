@@ -82,7 +82,7 @@ const ListCustomers: React.FC<ListCustomersProps> = ({ me }) => {
             try {
                 await deleteCustomer(customerId);
                 setCustomers((prev) => prev.filter(c => c.id !== customerId));
-                ensureCSRFToken();
+                await ensureCSRFToken();
             } catch (error) {
                 alert("Failed to downgrade the customer.");
             }

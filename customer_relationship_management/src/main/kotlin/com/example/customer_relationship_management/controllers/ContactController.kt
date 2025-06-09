@@ -5,16 +5,22 @@ import com.example.customer_relationship_management.dtos.CreateContactDTO
 import com.example.customer_relationship_management.dtos.toDto
 import com.example.customer_relationship_management.services.ContactDetailsService
 import com.example.customer_relationship_management.services.ContactService
+import com.example.customer_relationship_management.services.CustomerService
+import com.example.customer_relationship_management.services.ProfessionalService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.security.core.Authentication
 
 
 @RestController
 @RequestMapping("/contacts")
-class ContactController (private val contactService: ContactService, private val contactDetailsService: ContactDetailsService) {
+class ContactController (
+    private val contactService: ContactService,
+    private val contactDetailsService: ContactDetailsService,
+    private val professionalService: ProfessionalService,
+    private val customerService: CustomerService
+) {
 
     private val logger = LoggerFactory.getLogger(ContactController::class.java)
 
@@ -39,7 +45,7 @@ class ContactController (private val contactService: ContactService, private val
 
     @PostMapping("/","")
     @ResponseStatus(HttpStatus.OK)
-    fun createContact(@RequestBody dto: CreateContactDTO, authentication: Authentication?) : ContactDTO {
+    fun createContact(@RequestBody dto: CreateContactDTO) : ContactDTO {
         if (dto.name == "" || dto.surname == "")
             throw NoContentException("Provide a valid contact")
         val createdContact = contactService.createContact(dto.name,dto.surname,"unknown",dto.ssnCode)
@@ -219,6 +225,12 @@ class ContactController (private val contactService: ContactService, private val
 
         val contact = contactService.findById(contactId)
 
+        if (contact.category.lowercase() == "professional"){
+            professionalService.deleteProfessional(contact.professional!!)
+        }
+        if (contact.category.lowercase() == "customer"){
+            customerService.deleteCustomer(contact.customer!!)
+        }
         //creating copy to avoid ConcurrentModificationException
         val emailsCopy = ArrayList(contact.emails)
         val addressesCopy = ArrayList(contact.addresses)

@@ -30,7 +30,7 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
 
     const [professionalData, setProfessionalData] = useState<CreateProfessionalDTO>({
         location: "",
-        state: "",
+        state: "employed",
         dailyRate: 0.0,
         skills: [],
     });
@@ -139,7 +139,15 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
                                 <Col md={5}>
                                     <Form.Group className="mb-3">
                                         <Form.Label>State</Form.Label>
-                                        <Form.Control value={professionalData.state} onChange={(e) => setProfessionalData((prev) => ({ ...prev, state: e.target.value }))} />
+                                        <Form.Select
+                                            name="state"
+                                            value={professionalData.state}
+                                            onChange={(e) => setProfessionalData((prev) => ({ ...prev, state: e.target.value }))}
+                                        >
+                                            <option value="employed">Employed</option>
+                                            <option value="available_for_work">Available for Work</option>
+                                            <option value="not_available">Not Available</option>
+                                        </Form.Select>
                                     </Form.Group>
                                 </Col>
                                 <Col md={2}>

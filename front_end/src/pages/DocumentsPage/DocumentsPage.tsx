@@ -10,7 +10,7 @@ import {
 } from "../../apis/apiDocument";
 import { DocumentMetadataDTO } from "../../objects/Document";
 import {ApiError, ensureCSRFToken} from "../../apis/apiUtils.tsx";
-import {BsCloudDownload, BsEye, BsPencilSquare, BsTrash} from "react-icons/bs";
+import {BsCloudDownload, BsCloudUpload, BsEye, BsPencilSquare, BsTrash} from "react-icons/bs";
 import {MeInterface} from "../../App.tsx";
 
 interface ListDocumentsProps {
@@ -152,7 +152,7 @@ const ListDocuments: React.FC<ListDocumentsProps> = ({ me }) => {
 
     return (
         <Container className="py-4">
-            <h2 className="mb-4">Gestione Documenti</h2>
+            <h2 className="mb-4">Documents list</h2>
 
             <Form.Group as={Row} className="mb-3">
                 <Form.Label column sm="4">Items per page:</Form.Label>
@@ -170,7 +170,34 @@ const ListDocuments: React.FC<ListDocumentsProps> = ({ me }) => {
             {canAddEdit && (
                 <Form.Group controlId="formFile" className="mb-3">
                     <Form.Label>Load new document</Form.Label>
-                    <Form.Control type="file" name="file" onChange={handleFileUpload} disabled={uploading} />
+                    <div className="d-flex align-items-center">
+                        <Form.Control
+                            type="file"
+                            name="file"
+                            id="hiddenFileInput"
+                            onChange={handleFileUpload}
+                            disabled={uploading}
+                            style={{ display: "none" }}
+                        />
+                        <Button
+                            variant="primary"
+                            onClick={() => document.getElementById("hiddenFileInput")?.click()}
+                            disabled={uploading}
+                        >
+                            <BsCloudUpload /> Add file
+                        </Button>
+                        <span className="ms-3">
+                            {document.querySelector<HTMLInputElement>('#hiddenFileInput')?.files?.[0] ? (
+                                <>
+                                    <strong>File added: </strong>
+                                    {document.querySelector<HTMLInputElement>('#hiddenFileInput')?.files?.[0]?.name}
+                                </>
+                          ) : (
+                              "No file selected"
+                          )}
+                        </span>
+
+                    </div>
                 </Form.Group>
             )}
             {loading && (

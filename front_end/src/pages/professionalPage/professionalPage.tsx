@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Card, Button, Spinner, Alert, Form, ListGroup, Modal } from 'react-bootstrap';
 import {
     BsEye,
@@ -132,6 +132,7 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
             try {
                 await deleteProfessionalAndContact(professionalId);
                 setProfessionals((prev) => prev.filter(p => p.id !== professionalId));
+                await ensureCSRFToken();
             } catch (error) {
                 alert("Failed to delete the contact.");
             }
@@ -143,10 +144,36 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
             try {
                 await deleteProfessional(professionalId);
                 setProfessionals((prev) => prev.filter(p => p.id !== professionalId));
+                await ensureCSRFToken();
             } catch (error) {
                 alert("Failed to downgrade the professional.");
             }
         });
+    };
+
+    function filterState(state: string): string {
+        switch (state) {
+            case "employed":
+                return "employed";
+            case "available_for_work":
+                return "available for work";
+            case "not_available":
+                return "not available";
+            default:
+                return state;
+        }
+    }
+
+    const getStateStyle = (state: string): React.CSSProperties => {
+        switch (state.toLowerCase()) {
+            case "employed":
+                return { backgroundColor: "#cfe2ff", color: "#052c65", borderRadius: "10px", padding: "2px 8px", display: "inline-block" };
+            case "available_for_work":
+                return { backgroundColor: "#d1e7dd", color: "#0f5132", borderRadius: "10px", padding: "2px 8px", display: "inline-block" };
+            case "not_available":
+            default:
+                return { backgroundColor: "#f8d7da", color: "#842029", borderRadius: "10px", padding: "2px 8px", display: "inline-block" };
+        }
     };
 
     const renderProfessionalCard = (prof: ProfessionalDTO) => (
@@ -169,7 +196,10 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
                     <Col md={6}>
                         <ListGroup variant="flush">
                             <ListGroup.Item style={{ backgroundColor: '#F6F5EC' }}>
-                                <strong>State:</strong> {prof.state}
+                                <strong>State:</strong>
+                                <span style={getStateStyle(prof.state)}>
+                                    {filterState(prof.state)}
+                                </span>
                             </ListGroup.Item>
                             <ListGroup.Item style={{ backgroundColor: '#F6F5EC' }}>
                                 <BsCashStack className="me-2" />
@@ -269,12 +299,16 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
                                 </Form.Group>
                                 <Form.Group className="mb-3">
                                     <Form.Label>State</Form.Label>
-                                    <Form.Control
-                                        type="text"
+                                    <Form.Select
                                         name="state"
                                         value={filters.state}
                                         onChange={handleInputChange}
-                                    />
+                                    >
+                                        <option value="">All states</option>
+                                        <option value="employed">Employed</option>
+                                        <option value="available_for_work">Available for Work</option>
+                                        <option value="not_available">Not Available</option>
+                                    </Form.Select>
                                 </Form.Group>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Skills</Form.Label>
