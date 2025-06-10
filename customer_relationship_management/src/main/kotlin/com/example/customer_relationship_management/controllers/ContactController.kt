@@ -384,6 +384,43 @@ class ContactController (
             throw NoContentException("Provide a valid contact")
         val contact = contactService.findById(contactId)
         val updatedContact = contactService.updateContact(contact, dto)
+        val existingEmails = updatedContact.emails.map { it.mail }.toSet()
+        val incomingEmails = dto.emails?.toSet() ?: emptySet()
+
+        val toDelete = existingEmails.subtract(incomingEmails)
+        updatedContact.emails.filter { it.mail in toDelete }.forEach { email ->
+            contactDetailsService.deleteEmail(email, updatedContact)
+        }
+        val toAdd = incomingEmails.subtract(existingEmails)
+        toAdd.forEach { email ->
+            contactDetailsService.createEmail(email, updatedContact)
+        }
+
+        val existingAddresses = updatedContact.addresses.map { it.address }.toSet()
+        val incomingAddresses = dto.addresses?.toSet() ?: emptySet()
+
+        val addressesToDelete = existingAddresses.subtract(incomingAddresses)
+        updatedContact.addresses.filter { it.address in addressesToDelete }.forEach { addr ->
+            contactDetailsService.deleteAddress(addr, updatedContact)
+        }
+
+        val addressesToAdd = incomingAddresses.subtract(existingAddresses)
+        addressesToAdd.forEach { addr ->
+            contactDetailsService.createAddress(addr, updatedContact)
+        }
+
+        val existingPN = updatedContact.phoneNumbers.map { it.number }.toSet()
+        val incomingPN = dto.phoneNumbers?.toSet() ?: emptySet()
+
+        val pnToDelete = existingPN.subtract(incomingPN)
+        updatedContact.phoneNumbers.filter { it.number in pnToDelete }.forEach { pn ->
+            contactDetailsService.deletePhoneNumber(pn, updatedContact)
+        }
+
+        val pnToAdd = incomingPN.subtract(existingPN)
+        pnToAdd.forEach { pn ->
+            contactDetailsService.createPhoneNumber(pn, updatedContact)
+        }
         logger.info("Contact with ID:${updatedContact.getId()}, name:${updatedContact.name}, surname:${updatedContact.surname} has been updated")
         return ResponseEntity.status(HttpStatus.OK).body(updatedContact.toDto())
     }

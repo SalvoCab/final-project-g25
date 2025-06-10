@@ -12,6 +12,7 @@ import {
 } from "react-icons/bs";
 import { MeInterface } from '../../App.tsx';
 import AddContactModal from "./addContactModal.tsx"
+import EditContactModal from "./editContactModal.tsx";
 import {ensureCSRFToken} from "../../apis/apiUtils.tsx";
 
 
@@ -36,6 +37,9 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
     const [contactToDelete, setContactToDelete] = useState<number | null>(null);
     const [appliedFilters, setAppliedFilters] = useState(filters);
     const [showModal, setShowModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [contactToEdit, setContactToEdit] = useState<ContactDTO | null>(null);
+
     const role = me?.role ?? "";
     const permissions = {
         canView: ["manager", "operator", "guest"],
@@ -175,7 +179,7 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
                 {/* Azioni visibili in base al ruolo */}
                 {(canAddEdit || canDelete) && (
                     <div className="mt-3 d-flex gap-2">
-                        {canAddEdit && <Button variant="warning"><BsPencilSquare /> Edit</Button>}
+                        {canAddEdit && <Button variant="warning" onClick={() => {setContactToEdit(contact);setShowEditModal(true)}}><BsPencilSquare /> Edit</Button>}
                         {canDelete && (
                             <Button variant="danger" onClick={() => handleDeleteClick(contact.id)}>
                                 <BsTrash /> Delete
@@ -308,6 +312,12 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
                 show={showModal}
                 onHide={() => setShowModal(false)}
                 onContactCreated={reloadContacts}
+            />
+            <EditContactModal
+                contact={contactToEdit}
+                show={showEditModal}
+                onHide={() => setShowEditModal(false)}
+                onContactEdited={reloadContacts}
             />
             <Modal show={confirmDeleteVisible} onHide={() => setConfirmDeleteVisible(false)} centered>
                 <Modal.Header closeButton>

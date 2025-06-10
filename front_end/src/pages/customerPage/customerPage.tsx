@@ -5,6 +5,8 @@ import {listCustomers, getCustomerDetails, deleteCustomerAndContact, deleteCusto
 import { CustomerDTO, CustomerDetails } from "../../objects/Customer";
 import { MeInterface } from "../../App";
 import {ensureCSRFToken} from "../../apis/apiUtils.tsx";
+import EditCustomerModal from "./editCustomerModal.tsx";
+import AddCustomerModal from "./addCustomerModal.tsx";
 
 interface ListCustomersProps {
     me: MeInterface | null;
@@ -17,6 +19,8 @@ const ListCustomers: React.FC<ListCustomersProps> = ({ me }) => {
     const [page, setPage] = useState(0);
     const [limit, setLimit] = useState(20);
     const [hasMore, setHasMore] = useState(false);
+    const [customerToEdit, setCustomerToEdit] = useState<CustomerDTO | null>(null);
+    const [showEditModal, setShowEditModal] = useState(false);
     const role = me?.role ?? "";
     const permissions = {
         canView: ["manager", "operator", "guest"],
@@ -29,6 +33,7 @@ const ListCustomers: React.FC<ListCustomersProps> = ({ me }) => {
 
     const [selectedCustomer, setSelectedCustomer] = useState<CustomerDetails | null>(null);
     const [showModal, setShowModal] = useState(false);
+    const [showAddModal, setShowAddModal] = useState(false);
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
     const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
     const [confirmMessage, setConfirmMessage] = useState("");
@@ -89,6 +94,23 @@ const ListCustomers: React.FC<ListCustomersProps> = ({ me }) => {
         });
     };
 
+    const reloadCustomer = () => {
+        setPage(0);
+        setLoading(true);
+        setError(null);
+        listCustomers({page, limit })
+            .then((data) => {
+                setCustomers(data);
+                setHasMore(data.length === limit);
+                ensureCSRFToken();
+            })
+            .catch((err: any) => {
+                setError(err.message || "Errore durante il caricamento dei contatti");
+                setCustomers([]);
+            })
+            .finally(() => setLoading(false));
+    }
+
     const renderCustomerCard = (customer: CustomerDTO) => (
         <Card key={customer.id} className="mb-3" style={{ backgroundColor: '#F6F5EC', border: '1px solid #14382C' }}>
             <Card.Body>
@@ -100,7 +122,7 @@ const ListCustomers: React.FC<ListCustomersProps> = ({ me }) => {
                 </ListGroup>
                 <div className="mt-3 d-flex justify-content-between align-items-center">
                     <div className="d-flex gap-2">
-                        {canAddEdit && <Button variant="warning"><BsPencilSquare /> Edit</Button>}
+                        {canAddEdit && <Button variant="warning" onClick={() => {setCustomerToEdit(customer);setShowEditModal(true)}}><BsPencilSquare /> Edit notes</Button>}
                         {canDelete && (
                             <>
                                 <Button variant="danger" onClick={() => handleDowngrade(customer.id)}>
@@ -130,7 +152,7 @@ const ListCustomers: React.FC<ListCustomersProps> = ({ me }) => {
 
                     {canAddEdit && (
                         <div className="mb-3">
-                            <Button className="btn-custom" onClick={() => setShowModal(true)} ><BsBuildingAdd /> Upgrade unknown contact as customer</Button>
+                            <Button className="btn-custom" onClick={() => setShowAddModal(true)} ><BsBuildingAdd /> Upgrade unknown contact as customer</Button>
                         </div>
                     )}
 
@@ -212,6 +234,17 @@ const ListCustomers: React.FC<ListCustomersProps> = ({ me }) => {
                     </Button>
                 </Modal.Footer>
             </Modal>
+            <EditCustomerModal
+                customer={customerToEdit}
+                show={showEditModal}
+                onHide={() => setShowEditModal(false)}
+                onCustomerEdited={reloadCustomer}
+            />
+            <AddCustomerModal
+                show={showAddModal}
+                onHide={() => setShowAddModal(false)}
+                onCustomerAdded={reloadCustomer}
+            />
 
         </Container>
     );
