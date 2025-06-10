@@ -162,15 +162,15 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
                         <ListGroup variant="flush">
                             <ListGroup.Item style={{ backgroundColor: '#F6F5EC' }}>
                                 <BsEnvelope className="me-2" />
-                                <strong>Email:</strong> {contact.emails.join(", ") || "None"}
+                                <strong>Email(s):</strong> {contact.emails.join(", ") || "None"}
                             </ListGroup.Item>
                             <ListGroup.Item style={{ backgroundColor: '#F6F5EC' }}>
                                 <BsGeoAlt className="me-2" />
-                                <strong>Address:</strong> {contact.addresses.join(", ") || "None"}
+                                <strong>Address(es):</strong> {contact.addresses.join(", ") || "None"}
                             </ListGroup.Item>
                             <ListGroup.Item style={{ backgroundColor: '#F6F5EC' }}>
                                 <BsTelephone className="me-2" />
-                                <strong>Phone number:</strong> {contact.phoneNumber.join(", ") || "None"}
+                                <strong>Phone number(s):</strong> {contact.phoneNumber.join(", ") || "None"}
                             </ListGroup.Item>
                         </ListGroup>
                     </Col>

@@ -43,6 +43,24 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        setContactData({
+            name: "",
+            surname: "",
+            ssnCode: "",
+            emails: [],
+            addresses: [],
+            phoneNumbers: [],
+        })
+        setProfessionalData({
+            location: "",
+            state: "employed",
+            dailyRate: 0.0,
+            skills: [],
+        });
+        setCategory("unknown");
+    }, [show]);
+
+    useEffect(() => {
         const fetchSkills = async () => {
             try {
                 const skills = await listAllSkills();
@@ -228,7 +246,7 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={onHide}>Cancel</Button>
-                <Button variant="primary" onClick={handleSubmit} disabled={loading}>
+                <Button className="btn-custom" onClick={handleSubmit} disabled={loading}>
                     {loading ? "Saving..." : "Save"}
                 </Button>
             </Modal.Footer>

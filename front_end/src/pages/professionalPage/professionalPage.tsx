@@ -18,6 +18,7 @@ import Select from "react-select";
 import { listAllSkills } from "../../apis/apiSkill";
 import { SkillDTO } from "../../objects/Skill";
 import {ensureCSRFToken} from "../../apis/apiUtils.tsx";
+import AddProfessionalModal from "./addProfessinalModal.tsx";
 
 interface ListProfessionalsProps {
     me: MeInterface | null;
@@ -32,6 +33,7 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
     const [hasMore, setHasMore] = useState(false);
     const [availableSkills, setAvailableSkills] = useState<SkillDTO[]>([]);
     const [selectedSkills, setSelectedSkills] = useState<{ value: number; label: string }[]>([]);
+    const [showAddModal, setShowAddModal] = useState(false);
     const role = me?.role ?? "";
     const permissions = {
         canView: ["manager", "operator", "guest"],
@@ -151,6 +153,27 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
         });
     };
 
+    const reloadProfessional = () => {
+        setPage(0);
+        setLoading(true);
+        setError(null);
+        const skillIds = appliedFilters.skills
+            .split(",")
+            .map(s => parseInt(s.trim()))
+            .filter(n => !isNaN(n));
+        listProfessionals(page, limit, skillIds, appliedFilters.location, appliedFilters.state)
+            .then((data) => {
+                setProfessionals(data);
+                setHasMore(data.length === limit);
+                ensureCSRFToken();
+            })
+            .catch((err: any) => {
+                setError(err.message || "Errore durante il caricamento dei professional");
+                setProfessionals([]);
+            })
+            .finally(() => setLoading(false));
+    }
+
     function filterState(state: string): string {
         switch (state) {
             case "employed":
@@ -241,7 +264,7 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
                     <h2 className="mb-4">Professionals</h2>
                     {canAddEdit && (
                         <div className="mb-3">
-                            <Button className="btn-custom" onClick={() => setShowModal(true)} ><BsPersonWorkspace /> Upgrade unknown contact as professional</Button>
+                            <Button className="btn-custom" onClick={() => setShowAddModal(true)} ><BsPersonWorkspace /> Upgrade unknown contact as professional</Button>
                         </div>
                     )}
                     <Form.Group as={Row} className="mb-3">
@@ -378,6 +401,11 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
                     </Button>
                 </Modal.Footer>
             </Modal>
+            <AddProfessionalModal
+                show={showAddModal}
+                onHide={() => setShowAddModal(false)}
+                onProfessionalAdded={reloadProfessional}
+            />
         </Container>
     );
 };

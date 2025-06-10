@@ -2,17 +2,26 @@ import { useEffect, useState } from "react";
 import {Button, Col, Form, Modal, Row, Spinner} from "react-bootstrap";
 import { ContactDTO } from "../../objects/Contact.ts";
 import { ensureCSRFToken } from "../../apis/apiUtils.tsx";
-import { createCustomer } from "../../apis/apiCustomer.tsx";
-import { listContacts } from "../../apis/apiContact.tsx"; // assuming the path
-import "./customerPage.css"
-interface AddCustomerModalProps {
+import { createProfessional } from "../../apis/apiProfessional.tsx";
+import { listContacts } from "../../apis/apiContact.tsx";
+import {CreateProfessionalDTO} from "../../objects/Professional.ts";
+import Select, {MultiValue} from "react-select";
+import {createSkill, listAllSkills} from "../../apis/apiSkill.tsx";
+import {SkillDTO} from "../../objects/Skill.ts";
+
+interface AddProfessionalModalProps {
     show: boolean;
     onHide: () => void;
-    onCustomerAdded: () => void;
+    onProfessionalAdded: () => void;
 }
 
-const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ show, onHide, onCustomerAdded }) => {
-    const [newNotes, setNewNotes] = useState("");
+const AddProfessionalModal: React.FC<AddProfessionalModalProps> = ({ show, onHide, onProfessionalAdded }) => {
+    const [professionalData, setProfessionalData] = useState<CreateProfessionalDTO>({
+        location: "",
+        state: "employed",
+        dailyRate: 0.0,
+        skills: [],
+    });
     const [loading, setLoading] = useState(false);
     const [contactSelected, setContactSelected] = useState<ContactDTO | null>(null);
     const [contacts, setContacts] = useState<ContactDTO[]>([]);
@@ -22,17 +31,19 @@ const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ show, onHide, onCus
     const [numberFilter, setNumberFilter] = useState("");
     const [keywordFilter, setKeywordFilter] = useState("");
     const [filtering, setFiltering] = useState(false);
+    const [availableSkills, setAvailableSkills] = useState<SkillDTO[]>([]);
+    const [newSkillName, setNewSkillName] = useState("");
 
     const handleSubmit = async () => {
         if (contactSelected === null) return;
         setLoading(true);
         try {
             await ensureCSRFToken();
-            await createCustomer(contactSelected.id, newNotes);
-            onCustomerAdded();
+            await createProfessional(contactSelected.id, professionalData);
+            onProfessionalAdded();
             onHide();
         } catch (error) {
-            alert("Error in creating customer. Even the best of us fail sometimes.");
+            alert("Error in creating professional. Even the best of us fail sometimes.");
             console.error(error);
         } finally {
             setLoading(false);
@@ -89,18 +100,43 @@ const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ show, onHide, onCus
         }
     };
 
+    const handleSkillsChange = (
+        selectedOptions: MultiValue<{ value: number; label: string }>
+    ) => {
+        const selectedIds = selectedOptions.map(option => option.value);
+        setProfessionalData(prev => ({ ...prev, skills: selectedIds }));
+    };
+
+    useEffect(() => {
+        const fetchSkills = async () => {
+            try {
+                const skills = await listAllSkills();
+                setAvailableSkills(skills);
+            } catch (error) {
+                console.error("Error in loading skills:", error);
+            }
+        };
+        fetchSkills();
+    }, []);
+
     useEffect(() => {
         if (show){
-            setNewNotes("");
+            setProfessionalData({
+                location: "",
+                state: "employed",
+                dailyRate: 0.0,
+                skills: [],
+            });
+            setNewSkillName("")
             handleClearFilters();
         }
-
     }, [show]);
+
 
     return (
         <Modal show={show} onHide={onHide} backdrop="static" centered size="lg">
             <Modal.Header closeButton>
-                <Modal.Title>Upgrade a <b>contact</b> to <b>customer</b></Modal.Title>
+                <Modal.Title>Upgrade a <b>contact</b> to <b>professional</b></Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form>
@@ -160,15 +196,77 @@ const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ show, onHide, onCus
                         </Form.Select>
                     </Form.Group>
 
-                    <Form.Group className="mb-3">
-                        <Form.Label>Notes</Form.Label>
-                        <Form.Control
-                            as="textarea"
-                            rows={3}
-                            value={newNotes}
-                            onChange={(e) => setNewNotes(e.target.value)}
-                        />
-                    </Form.Group>
+                    <Row>
+                        <Col md={5}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Location</Form.Label>
+                                <Form.Control value={professionalData.location} onChange={(e) => setProfessionalData((prev) => ({ ...prev, location: e.target.value }))} />
+                            </Form.Group>
+                        </Col>
+                        <Col md={5}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>State</Form.Label>
+                                <Form.Select
+                                    name="state"
+                                    value={professionalData?.state}
+                                    onChange={(e) => setProfessionalData((prev) => ({ ...prev, state: e.target.value }))}
+                                >
+                                    <option value="employed">Employed</option>
+                                    <option value="available_for_work">Available for Work</option>
+                                    <option value="not_available">Not Available</option>
+                                </Form.Select>
+                            </Form.Group>
+                        </Col>
+                        <Col md={2}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Daily Rate</Form.Label>
+                                <Form.Control type="number" step="0.1" value={professionalData?.dailyRate} onChange={(e) => setProfessionalData((prev) => ({ ...prev, dailyRate: parseFloat(e.target.value) }))} />
+                            </Form.Group>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Skills</Form.Label>
+                                <Select
+                                    isMulti
+                                    options={availableSkills.map(skill => ({
+                                        value: skill.id!,
+                                        label: skill.skill,
+                                    }))}
+                                    value={availableSkills
+                                        .filter(skill => professionalData.skills?.includes(skill.id!))
+                                        .map(skill => ({
+                                            value: skill.id!,
+                                            label: skill.skill,
+                                        }))
+                                    }
+                                    onChange={handleSkillsChange}
+                                />
+                            </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>New skill</Form.Label>
+                                <Form.Control type="text" value={newSkillName} onChange={(e) => setNewSkillName(e.target.value)} placeholder="Insert new skill" />
+                                <Button variant="secondary" className="mt-2" onClick={async () => {
+                                    if (!newSkillName.trim()) return;
+                                    try {
+                                        const newSkill = await createSkill(newSkillName.trim());
+                                        setAvailableSkills((prev) => [...prev, newSkill]);
+                                        setProfessionalData((prev) => ({
+                                            ...prev,
+                                            skills: [...(prev.skills ?? []), newSkill.id!],
+                                        }));
+                                        setNewSkillName("");
+                                        await ensureCSRFToken();
+                                    } catch (error) {
+                                        console.error("Error creating skill:", error);
+                                    }
+                                }}>Add skill</Button>
+                            </Form.Group>
+                        </Col>
+                    </Row>
                 </Form>
             </Modal.Body>
             <Modal.Footer>
@@ -181,4 +279,4 @@ const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ show, onHide, onCus
     );
 };
 
-export default AddCustomerModal;
+export default AddProfessionalModal;
