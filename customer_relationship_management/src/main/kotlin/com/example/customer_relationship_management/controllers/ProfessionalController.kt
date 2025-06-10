@@ -47,6 +47,20 @@ class ProfessionalController(private val professionalService: ProfessionalServic
             throw NoContentException("Provide a valid professional")
         val professional = professionalService.findById(professionalId)
         val updatedProfessional = professionalService.updateProfessional(dto.location, dto.state,dto.dailyRate, professional)
+
+        val existingSkills = updatedProfessional.skills.map { it.getId() }.toSet()
+        val incomingSkills = dto.skills?.toSet() ?: emptySet()
+
+        val toDelete = existingSkills.subtract(incomingSkills)
+        updatedProfessional.skills.filter { it.getId() in toDelete }.forEach { skill ->
+            professionalService.removeProfessionalSkill(updatedProfessional,skill)
+        }
+        val toAdd = incomingSkills.subtract(existingSkills)
+        toAdd.forEach { id ->
+            val skill= skillService.findById(id!!)
+            professionalService.addProfessionalSkill(updatedProfessional,skill)
+        }
+
         logger.info("Professional with ID:${updatedProfessional.getId()} have been updated")
         return updatedProfessional.toDto()
     }

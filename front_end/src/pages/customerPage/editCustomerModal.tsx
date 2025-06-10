@@ -34,8 +34,10 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({customer, show, on
     };
 
     useEffect(() => {
-        setNewNotes(customer?.notes ?? "");
-        setCustomerData(customer);
+        if(show){
+            setNewNotes(customer?.notes ?? "");
+            setCustomerData(customer);
+        }
     }, [show]);
 
     return (

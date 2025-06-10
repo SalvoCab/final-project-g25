@@ -60,20 +60,22 @@ const EditContactModal: React.FC<EditContactModalProps> = ({contact, show, onHid
     }, []);
 
     useEffect(() => {
-        setCategory("unknown");
-        setContactData({
-            name: contact?.name ?? "",
-            surname: contact?.surname ?? "",
-            ssnCode: contact?.ssnCode ?? "",
-            emails: contact?.emails ?? [],
-            addresses: contact?.addresses ?? [],
-            phoneNumbers: contact?.phoneNumber ?? [],
-        })
-        setRawInput({
-            emails: contact?.emails?.join(", ") || "",
-            addresses: contact?.addresses?.join(", ") || "",
-            phoneNumbers: contact?.phoneNumber?.join(", ") || "",
-        });
+        if(show){
+            setCategory("unknown");
+            setContactData({
+                name: contact?.name ?? "",
+                surname: contact?.surname ?? "",
+                ssnCode: contact?.ssnCode ?? "",
+                emails: contact?.emails ?? [],
+                addresses: contact?.addresses ?? [],
+                phoneNumbers: contact?.phoneNumber ?? [],
+            })
+            setRawInput({
+                emails: contact?.emails?.join(", ") || "",
+                addresses: contact?.addresses?.join(", ") || "",
+                phoneNumbers: contact?.phoneNumber?.join(", ") || "",
+            });
+        }
     }, [show]);
 
     const handleContactChange = (e: React.ChangeEvent<HTMLInputElement>) => {

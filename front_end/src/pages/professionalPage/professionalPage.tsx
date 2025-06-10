@@ -19,6 +19,7 @@ import { listAllSkills } from "../../apis/apiSkill";
 import { SkillDTO } from "../../objects/Skill";
 import {ensureCSRFToken} from "../../apis/apiUtils.tsx";
 import AddProfessionalModal from "./addProfessinalModal.tsx";
+import EditProfessionalModal from "./editProfessionalModal.tsx";
 
 interface ListProfessionalsProps {
     me: MeInterface | null;
@@ -34,6 +35,7 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
     const [availableSkills, setAvailableSkills] = useState<SkillDTO[]>([]);
     const [selectedSkills, setSelectedSkills] = useState<{ value: number; label: string }[]>([]);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [professionalToEdit, setProfessionalToEdit] = useState<ProfessionalDTO | null>(null);
     const role = me?.role ?? "";
     const permissions = {
         canView: ["manager", "operator", "guest"],
@@ -56,6 +58,7 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
     const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
     const [confirmMessage, setConfirmMessage] = useState("");
+    const [showEditModal, setShowEditModal] = useState(false);
     const hasActiveFilters = Object.values(appliedFilters).some(val => val !== "");
     const showConfirmation = (message: string, onConfirm: () => void) => {
         setConfirmMessage(message);
@@ -233,7 +236,7 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
                 </Row>
                     <div className="mt-3 d-flex justify-content-between align-items-center">
                         <div className="d-flex gap-2">
-                            {canAddEdit && <Button variant="warning"><BsPencilSquare /> Edit</Button>}
+                            {canAddEdit && <Button variant="warning" onClick={() => {setProfessionalToEdit(prof);setShowEditModal(true)}}><BsPencilSquare /> Edit</Button>}
                             {canDelete && (
                                 <>
                                     <Button variant="danger" onClick={() => handleDowngrade(prof.id)}>
@@ -405,6 +408,12 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
                 show={showAddModal}
                 onHide={() => setShowAddModal(false)}
                 onProfessionalAdded={reloadProfessional}
+            />
+            <EditProfessionalModal
+                professional={professionalToEdit}
+                show={showEditModal}
+                onHide={() => setShowEditModal(false)}
+                onProfessionalEdited={reloadProfessional}
             />
         </Container>
     );
