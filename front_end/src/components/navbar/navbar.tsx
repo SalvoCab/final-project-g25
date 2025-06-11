@@ -37,12 +37,6 @@ const Navbar: React.FC<NavbarProps> = ({ me }) => {
                     <ul className="navbar-nav ml-auto d-flex align-items-center gap-3">
                         {me && me.principal && (
                             <>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="/job-offers">Vai</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="/job-offers-list">Lista</Link>
-                                </li>
                                 <li className="nav-item nav-link">
                                     Welcome <b>{me.principal.givenName} {me.principal.familyName} <i>({me.name})</i></b>
                                 </li>

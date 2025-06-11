@@ -1,8 +1,10 @@
 package com.example.customer_relationship_management.services
 
+import com.example.customer_relationship_management.dtos.JobOfferCandidateDTO
 import com.example.customer_relationship_management.dtos.JobOfferDTO
 import com.example.customer_relationship_management.entities.Customer
 import com.example.customer_relationship_management.entities.JobOffer
+import com.example.customer_relationship_management.entities.JobOfferCandidate
 import com.example.customer_relationship_management.entities.Professional
 import com.example.customer_relationship_management.entities.Skill
 
@@ -42,4 +44,13 @@ interface JobOfferService {
     fun addJobOfferSkill(jobOffer :JobOffer, newSkill: Skill): JobOffer
 
     fun removeJobOfferSkill(jobOffer :JobOffer, skill: Skill): JobOffer
+
+    fun save(jobOffer: JobOffer): JobOffer
+
+    fun  listCandidateFirstPhase(jobOfferId: Long) : List<JobOfferCandidateDTO>
+    fun  listCandidateSecondPhase(jobOfferId: Long) : List<JobOfferCandidateDTO>
+
+    fun findCandidateByID (candidateId:Long) : JobOfferCandidate
+
+    fun updateCandidate(candidate: JobOfferCandidate): JobOfferCandidate
 }

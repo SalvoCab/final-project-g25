@@ -1,4 +1,9 @@
-import {CreateJobOffer, JobOffer, UpdateJobOfferStatusDTO} from "../objects/JobOffer";
+import {
+    candidate, CandidateDTO,
+    CreateJobOffer,
+    JobOffer, UpdateCandidateDTO,
+    UpdateJobOfferStatusDTO
+} from "../objects/JobOffer";
 import {customFetch} from "./apiUtils.tsx";
 
 
@@ -43,7 +48,13 @@ export function listOpenJobOffers(customerId: number, page = 0, limit = 20): Pro
 
     return customFetch(`/crm/joboffers/open/${customerId}?${params.toString()}`);
 }
+export function listCandidatesPhaseOne(JobOfferId:number): Promise<CandidateDTO[]> {
 
+    return customFetch(`/crm/joboffers/candidates/one/${JobOfferId}`);
+}
+export function listCandidatesPhaseTwo(JobOfferId:number): Promise<CandidateDTO[]> {
+    return customFetch(`/crm/joboffers/candidates/two/${JobOfferId}`);
+}
 // GET /joboffers/accepted/{professionalId}
 export function listAcceptedJobOffers(professionalId: number, page = 0, limit = 20): Promise<JobOffer[]> {
     const params = new URLSearchParams({
@@ -88,6 +99,18 @@ export function updateJobOffer(jobOfferId: number, job: CreateJobOffer): Promise
     });
 }
 
+// PUT /joboffers/{candidateId}
+export function updateCandidate(candidateId: number, job: UpdateCandidateDTO): Promise<CandidateDTO> {
+    const params = new URLSearchParams({
+        note: job.note,
+        state: job.state,
+    });
+
+    return customFetch(`/crm/joboffers/candidate/${candidateId}?${params.toString()}`, {
+        method: "PUT",
+    });
+}
+
 // DELETE /joboffers/{jobOfferId}
 export function deleteJobOffer(jobOfferId: number): Promise<JobOffer> {
     return customFetch(`/crm/joboffers/${jobOfferId}`, {
@@ -97,7 +120,7 @@ export function deleteJobOffer(jobOfferId: number): Promise<JobOffer> {
 
 // POST /joboffers/{jobOfferId}
 export function updateJobOfferStatus(jobOfferId: number, dto: UpdateJobOfferStatusDTO): Promise<JobOffer> {
-    return customFetch(`/crm/joboffers/${jobOfferId}`, {
+    return customFetch(`/crm/joboffers/next/${jobOfferId}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -141,5 +164,27 @@ export function associateSkillToJobOffer(jobOfferId: number, skill: string): Pro
             "Content-Type": "application/json",
         },
         body: JSON.stringify(skill),
+    });
+}
+
+export function addCandidatesToJobOffer(
+    jobOfferId: number,
+    candidates: candidate[]
+): Promise<JobOffer> {
+    return customFetch(`/crm/joboffers/${jobOfferId}/candidates`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(candidates),
+    });
+}
+
+export function removeCandidateFromJobOffer(
+    jobOfferId: number,
+    professionalId: number
+): Promise<void> {
+    return customFetch(`/crm/joboffers/${jobOfferId}/candidates/${professionalId}`, {
+        method: "DELETE",
     });
 }

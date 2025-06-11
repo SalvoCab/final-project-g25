@@ -65,6 +65,21 @@ class JobOfferController(private val jobOfferService: JobOfferService, private v
         return jobOfferService.listAbortedPaginated(offset, limit, "aborted", customer, professional)
     }
 
+    @GetMapping("/candidates/one/{jobOfferId}")
+    @ResponseStatus(HttpStatus.OK)
+    fun listCandidatesFirstPhase(
+        @PathVariable jobOfferId: Long
+    ): List<JobOfferCandidateDTO> {
+        return jobOfferService.listCandidateFirstPhase(jobOfferId)
+    }
+    @GetMapping("/candidates/two/{jobOfferId}")
+    @ResponseStatus(HttpStatus.OK)
+    fun listCandidatesSecondPhase(
+        @PathVariable jobOfferId: Long
+    ): List<JobOfferCandidateDTO> {
+        return jobOfferService.listCandidateSecondPhase(jobOfferId)
+    }
+
     @PostMapping("/{customerId}/customer")
     @ResponseStatus(HttpStatus.OK)
     fun createJobOffer(@RequestBody dto: CreateJobOfferDTO,@PathVariable customerId: Long): JobOfferDTO {
@@ -101,6 +116,17 @@ class JobOfferController(private val jobOfferService: JobOfferService, private v
         return jb.toDto()
     }
 
+    @PutMapping("/candidate/{candidateId}")
+    @ResponseStatus(HttpStatus.OK)
+    fun updateCandidate(@PathVariable candidateId: Long, @RequestParam note:String, @RequestParam state: String): JobOfferCandidateDTO {
+        val candidate = jobOfferService.findCandidateByID(candidateId)
+        candidate.status=state
+        candidate.note=note
+        val c = jobOfferService.updateCandidate(candidate)
+
+        return c.toDto()
+    }
+
     @DeleteMapping("/{jobOfferId}")
     fun deleteJobOffer(@PathVariable jobOfferId: Long): ResponseEntity<Any> {
         val jobOffer = jobOfferService.findById(jobOfferId)
@@ -112,14 +138,14 @@ class JobOfferController(private val jobOfferService: JobOfferService, private v
         )
     }
 
-    @PostMapping("/{jobOfferId}")
+    @PostMapping("/next/{jobOfferId}")
     fun updateJobOfferStatus(@PathVariable jobOfferId: Long, @RequestBody dto: UpdateJobOfferStatusDTO): ResponseEntity<Any> {
 
         val jb = jobOfferService.findById(jobOfferId)
         val professional=if(dto.state.lowercase()=="consolidated" && dto.professionalId != null){
             professionalService.findById(dto.professionalId)
         }else null
-
+        logger.info("Job Offer with ID '${jb.getId()}' has a new state : '${dto.state}'.")
         val updatedJobOffer = jobOfferService.updateJobOfferStatus(dto.state, dto.notes,professional, jb)
         logger.info("Job Offer with ID '${updatedJobOffer.getId()}' has a new state : '${updatedJobOffer.state}'.")
 
@@ -183,6 +209,43 @@ class JobOfferController(private val jobOfferService: JobOfferService, private v
         val newJobOffer = jobOfferService.addJobOfferSkill(jobOffer, newSkill)
         logger.info("job offer with ID:${newJobOffer.getId()} added skill: $skill")
         return newJobOffer.toDto()
+    }
+    @PostMapping("/{jobOfferId}/candidates")
+    @ResponseStatus(HttpStatus.OK)
+    fun addCandidatesToJobOffer(
+        @PathVariable jobOfferId: Long,
+        @RequestBody candidates: List<JobOfferCandidateRequestDTO>
+    ): JobOfferDTO {
+        if (candidates.isEmpty()) {
+            throw NoContentException("Provide at least one candidate")
+        }
+
+        val jobOffer = jobOfferService.findById(jobOfferId)
+
+        candidates.forEach { dto ->
+            logger.info("Adding candidate with ID:${dto} to job offer with ID:${jobOfferId}")
+            val professional = professionalService.findById(dto.professionalId)
+            jobOffer.addCandidate(professional, dto.status, dto.note)
+        }
+
+        val updatedJobOffer = jobOfferService.save(jobOffer)
+
+        logger.info("Job Offer with ID: $jobOfferId has new candidates: ${candidates.map { it.professionalId }}")
+
+        return updatedJobOffer.toDto()
+    }
+
+    @DeleteMapping("/{jobOfferId}/candidates/{professionalId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun removeCandidateFromJobOffer(
+        @PathVariable jobOfferId: Long,
+        @PathVariable professionalId: Long
+    ) {
+        val jobOffer = jobOfferService.findById(jobOfferId)
+        val professional = professionalService.findById(professionalId)
+        jobOffer.removeCandidate(professional)
+        jobOfferService.save(jobOffer)
+        logger.info("Removed candidate $professionalId from job offer $jobOfferId")
     }
 
 

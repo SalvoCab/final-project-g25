@@ -3,12 +3,15 @@ package com.example.customer_relationship_management.services
 
 
 import com.example.customer_relationship_management.controllers.InvalidStateException
+import com.example.customer_relationship_management.dtos.JobOfferCandidateDTO
 import com.example.customer_relationship_management.dtos.JobOfferDTO
 import com.example.customer_relationship_management.dtos.toDto
 import com.example.customer_relationship_management.entities.Customer
 import com.example.customer_relationship_management.entities.JobOffer
+import com.example.customer_relationship_management.entities.JobOfferCandidate
 import com.example.customer_relationship_management.entities.Professional
 import com.example.customer_relationship_management.entities.Skill
+import com.example.customer_relationship_management.repositories.JobOfferCandidateRepository
 import com.example.customer_relationship_management.repositories.JobOfferRepository
 import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
@@ -19,7 +22,11 @@ import jakarta.persistence.criteria.Root
 import org.springframework.stereotype.Service
 
 @Service
-class JobOfferServiceImpl (private val jobOfferRepository: JobOfferRepository, private val entityManager: EntityManager) : JobOfferService {
+class JobOfferServiceImpl (
+    private val jobOfferRepository: JobOfferRepository,
+    private val entityManager: EntityManager,
+    private val jobOfferCandidateRepository: JobOfferCandidateRepository
+) : JobOfferService {
     override fun createJobOffer(
         description: String,
         state: String,
@@ -158,7 +165,7 @@ class JobOfferServiceImpl (private val jobOfferRepository: JobOfferRepository, p
                 jobOffer.goToSelectionPhase(notes?:"")
                 if(jobOffer.professional!=null){
                     jobOffer.value = null
-                    jobOffer.professional!!.state="Unemployed"
+                    jobOffer.professional!!.state="available_for_work"
                     jobOffer.professional!!.removeJob(jobOffer)
                 }
 
@@ -174,8 +181,8 @@ class JobOfferServiceImpl (private val jobOfferRepository: JobOfferRepository, p
             "consolidated" -> if(jobOffer.state.lowercase()=="candidate proposal"){
                 jobOffer.goToConsolidated(notes?:"")
                 if (professional != null) {
-                    if(professional.state.lowercase()=="unemployed"){
-                        professional.state="Employed"
+                    if(professional.state.lowercase()=="available_for_work"){
+                        professional.state="employed"
                         professional.addJob(jobOffer)
                         jobOffer.value=professional.dailyRate*jobOffer.duration*1.1
                     }else{
@@ -190,14 +197,35 @@ class JobOfferServiceImpl (private val jobOfferRepository: JobOfferRepository, p
             }
             "done" -> if(jobOffer.state.lowercase()=="consolidated"){
                 jobOffer.goToDone(notes?:"")
+                if(jobOffer.professional!=null){
+                    jobOffer.professional!!.state="available_for_work"
+                }
 
             }else{
                 throw InvalidStateException("The job offer can't reach this status(done) from his actual state(${jobOffer.state})")
             }
-            "aborted" -> if(jobOffer.state.lowercase()!="done"){
-                jobOffer.goToAborted(notes?:"")
+            "abortedone" -> if(jobOffer.state.lowercase()=="created"){
+                jobOffer.goToAbortedOne(notes?:"")
                 if(jobOffer.professional!=null){
-                    jobOffer.professional!!.state="Unemployed"
+                    jobOffer.professional!!.state="available_for_work"
+                }
+
+            }else{
+                throw InvalidStateException("The job offer can't reach this status(aborted) from his actual state(${jobOffer.state})")
+            }
+            "abortedtwo" -> if(jobOffer.state.lowercase()=="selection phase"){
+                jobOffer.goToAbortedTwo(notes?:"")
+                if(jobOffer.professional!=null){
+                    jobOffer.professional!!.state="available_for_work"
+                }
+
+            }else{
+                throw InvalidStateException("The job offer can't reach this status(aborted) from his actual state(${jobOffer.state})")
+            }
+            "abortedthree" -> if(jobOffer.state.lowercase()=="candidate proposal"){
+                jobOffer.goToAbortedThree(notes?:"")
+                if(jobOffer.professional!=null){
+                    jobOffer.professional!!.state="available_for_work"
                 }
 
             }else{
@@ -228,6 +256,29 @@ class JobOfferServiceImpl (private val jobOfferRepository: JobOfferRepository, p
     override fun removeJobOfferSkill(jobOffer: JobOffer, skill: Skill): JobOffer {
         jobOffer.removeSkill(skill)
         return jobOfferRepository.save(jobOffer)
+    }
+
+    override fun save(jobOffer: JobOffer): JobOffer {
+        return jobOfferRepository.save(jobOffer)
+    }
+
+    override fun listCandidateFirstPhase(jobOfferId: Long): List<JobOfferCandidateDTO> {
+        val candidates = jobOfferCandidateRepository.findByJobOfferIdAndStatus(jobOfferId, "selected")
+        return candidates.map { it.toDto() }
+    }
+
+    override fun listCandidateSecondPhase(jobOfferId: Long): List<JobOfferCandidateDTO> {
+        val candidates = jobOfferCandidateRepository.findByJobOfferIdAndStatus(jobOfferId, "Accepted")
+        return candidates.map { it.toDto() }
+    }
+
+    override fun findCandidateByID (candidateId:Long) : JobOfferCandidate {
+        val candidate = jobOfferCandidateRepository.findById(candidateId)
+        return candidate.get()
+    }
+
+    override fun updateCandidate(candidate: JobOfferCandidate): JobOfferCandidate {
+        return jobOfferCandidateRepository.save(candidate)
     }
 
 }

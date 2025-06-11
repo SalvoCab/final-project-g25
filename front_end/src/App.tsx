@@ -5,7 +5,6 @@ import Navbar from "./components/navbar/navbar";
 import Sidebar from "./components/sidebar/sidebar.tsx";
 import ProfilePage from "./pages/profilePage/profilePage";
 import { Container, Row, Col, Card } from "react-bootstrap";
-import AddJobOfferPage from "./pages/jobOfferPage/JobOfferPage";
 import ListJobOffers from "./pages/jobOfferPage/JobOfferList.tsx";
 import ListContacts from "./pages/contactPage/contactPage.tsx";
 import ContactUsPage from "./pages/ContactUsPage/ContactUsPage.tsx";
@@ -139,7 +138,6 @@ function App() {
                                 <Routes>
                                     <Route path="/" element={<h2>Welcome to the Management System</h2>} />
                                     <Route path="/profile" element={<ProfilePage me={me} />} />
-                                    <Route path="/job-offers" element={<AddJobOfferPage customerId={42} availableSkills={[{ id: 1, name: "Java" }, { id: 2, name: "Kotlin" }]} />} />
                                     <Route path="/job-offers-list" element={<ListJobOffers />} />
                                     <Route path="/contacts" element={<ListContacts me={me} />} />
                                     <Route path="/professionals" element={<ListProfessionals me={me} />}/>
