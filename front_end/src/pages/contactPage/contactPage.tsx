@@ -299,7 +299,7 @@ const ListContacts: React.FC<ListContactsProps> = ({ me }) => {
                                         onChange={handleInputChange}
                                     />
                                 </Form.Group>
-                                <Button variant="primary" onClick={handleSearch} className="w-100">Search</Button>
+                                <Button onClick={handleSearch} className="w-100 btn-custom">Search</Button>
                                 <Button variant="danger" onClick={handleClearFilters} className="w-100 mt-2" disabled={!hasActiveFilters}>
                                     Remove Filters
                                 </Button>

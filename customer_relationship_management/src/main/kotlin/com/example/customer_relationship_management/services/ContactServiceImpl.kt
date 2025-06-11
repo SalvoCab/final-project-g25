@@ -47,10 +47,16 @@ class ContactServiceImpl (private val contactRepository: ContactRepository, priv
         }
     }
 
-    override fun listPaginated(offset: Int, limit: Int,email:String, address:String, number:String, keyword:String): List<ContactDTO> {
+    override fun listPaginated(offset: Int, limit: Int, email: String, address: String, number: String, keyword: String): List<ContactDTO> {
         val criteriaBuilder: CriteriaBuilder = entityManager.criteriaBuilder
         val criteriaQuery: CriteriaQuery<Contact> = criteriaBuilder.createQuery(Contact::class.java)
         val contactRoot: Root<Contact> = criteriaQuery.from(Contact::class.java)
+
+        contactRoot.fetch<Contact, Email>("emails", JoinType.LEFT)
+        contactRoot.fetch<Contact, Address>("addresses", JoinType.LEFT)
+        contactRoot.fetch<Contact, PhoneNumber>("phoneNumbers", JoinType.LEFT)
+
+        criteriaQuery.select(contactRoot).distinct(true)
 
         val emailJoin = contactRoot.joinSet<Contact, Email>("emails", JoinType.LEFT)
         val addressJoin = contactRoot.joinSet<Contact, Address>("addresses", JoinType.LEFT)
@@ -59,41 +65,54 @@ class ContactServiceImpl (private val contactRepository: ContactRepository, priv
         val predicates = mutableListOf<Predicate>()
 
         if (email.isNotBlank()) {
-            val emailPredicate = criteriaBuilder.like(criteriaBuilder.lower(emailJoin.get<String>("mail")), "%${email.lowercase()}%")
+            val emailPredicate = criteriaBuilder.like(
+                criteriaBuilder.lower(emailJoin.get<String>("mail")),
+                "%${email.lowercase()}%"
+            )
             predicates.add(emailPredicate)
         }
         if (address.isNotBlank()) {
-            val addressPredicate = criteriaBuilder.like(criteriaBuilder.lower(addressJoin.get<String>("address")), "%${address.lowercase()}%")
+            val addressPredicate = criteriaBuilder.like(
+                criteriaBuilder.lower(addressJoin.get<String>("address")),
+                "%${address.lowercase()}%"
+            )
             predicates.add(addressPredicate)
         }
         if (number.isNotBlank()) {
-            val numberPredicate = criteriaBuilder.like(criteriaBuilder.lower(phoneNumberJoin.get<String>("number")), "%${number.lowercase()}%")
+            val numberPredicate = criteriaBuilder.like(
+                criteriaBuilder.lower(phoneNumberJoin.get<String>("number")),
+                "%${number.lowercase()}%"
+            )
             predicates.add(numberPredicate)
         }
 
         if (keyword.isNotBlank()) {
             val keywordLowerCase = keyword.lowercase()
             val keywordPredicate = criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.lower(contactRoot.get<String>("name")), "%$keywordLowerCase%"),
-                    criteriaBuilder.like(criteriaBuilder.lower(contactRoot.get<String>("surname")), "%$keywordLowerCase%"),
-                    criteriaBuilder.like(criteriaBuilder.lower(contactRoot.get<String>("category")), "%$keywordLowerCase%"),
-                    criteriaBuilder.like(criteriaBuilder.lower(contactRoot.get<String>("ssnCode")), "%$keywordLowerCase%"),
-                    criteriaBuilder.like(criteriaBuilder.lower(emailJoin.get<String>("mail")), "%$keywordLowerCase%"),
-                    criteriaBuilder.like(criteriaBuilder.lower(addressJoin.get<String>("address")), "%$keywordLowerCase%"),
-                    criteriaBuilder.like(criteriaBuilder.lower(phoneNumberJoin.get<String>("number")), "%$keywordLowerCase%")
+                criteriaBuilder.like(criteriaBuilder.lower(contactRoot.get<String>("name")), "%$keywordLowerCase%"),
+                criteriaBuilder.like(criteriaBuilder.lower(contactRoot.get<String>("surname")), "%$keywordLowerCase%"),
+                criteriaBuilder.like(criteriaBuilder.lower(contactRoot.get<String>("category")), "%$keywordLowerCase%"),
+                criteriaBuilder.like(criteriaBuilder.lower(contactRoot.get<String>("ssnCode")), "%$keywordLowerCase%"),
+                criteriaBuilder.like(criteriaBuilder.lower(emailJoin.get<String>("mail")), "%$keywordLowerCase%"),
+                criteriaBuilder.like(criteriaBuilder.lower(addressJoin.get<String>("address")), "%$keywordLowerCase%"),
+                criteriaBuilder.like(criteriaBuilder.lower(phoneNumberJoin.get<String>("number")), "%$keywordLowerCase%")
             )
             predicates.add(keywordPredicate)
         }
 
-        val finalPredicate = criteriaBuilder.and(*predicates.toTypedArray())
-        criteriaQuery.where(finalPredicate)
+        if (predicates.isNotEmpty()) {
+            criteriaQuery.where(criteriaBuilder.and(*predicates.toTypedArray()))
+        }
+
+        criteriaQuery.orderBy(criteriaBuilder.asc(contactRoot.get<String>("name")))
 
         val query = entityManager.createQuery(criteriaQuery)
-        query.maxResults = limit
         query.firstResult = offset
+        query.maxResults = limit
 
         return query.resultList.map { it.toDto() }
     }
+
 
     override fun updateName(contact: Contact, newName: String): Contact {
         contact.name = newName

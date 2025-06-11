@@ -104,7 +104,7 @@ const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ show, onHide, onCus
             </Modal.Header>
             <Modal.Body>
                 <Form>
-                    <h5>🔍 Filter Contacts</h5>
+                    <h5>Filter Contacts</h5>
                     <div className="d-flex flex-wrap gap-2 mb-3">
                         <Row>
                             <Col mb="3">

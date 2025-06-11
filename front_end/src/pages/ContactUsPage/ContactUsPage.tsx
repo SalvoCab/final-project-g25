@@ -90,7 +90,7 @@ const ContactUsPage: React.FC = () => {
                     />
                 </Form.Group>
 
-                <Button variant="primary" type="submit">
+                <Button className="btn-custom" type="submit">
                     Send Message
                 </Button>
             </Form>
