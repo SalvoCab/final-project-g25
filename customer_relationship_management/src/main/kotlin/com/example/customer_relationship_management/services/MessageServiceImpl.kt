@@ -4,8 +4,10 @@ package com.example.customer_relationship_management.services
 import com.example.customer_relationship_management.controllers.InvalidStateException
 import com.example.customer_relationship_management.controllers.MessageNotFoundException
 import com.example.customer_relationship_management.dtos.MessageDTO
+import com.example.customer_relationship_management.dtos.MessageKafkaDTO
 import com.example.customer_relationship_management.dtos.SendEmailDTO
 import com.example.customer_relationship_management.dtos.toDto
+import com.example.customer_relationship_management.dtos.toMessageKafkaDTO
 import com.example.customer_relationship_management.entities.*
 import com.example.customer_relationship_management.repositories.MessageRepository
 import jakarta.persistence.EntityManager
@@ -14,12 +16,13 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @Service
-class MessageServiceImpl(private val messageRepository: MessageRepository,private val entityManager: EntityManager) : MessageService {
+class MessageServiceImpl(private val messageRepository: MessageRepository,private val entityManager: EntityManager, private val kafkaTemplate: KafkaTemplate<String, MessageKafkaDTO>) : MessageService {
     override fun createMessage(
         sender: String,
         subject: String,
@@ -37,7 +40,9 @@ class MessageServiceImpl(private val messageRepository: MessageRepository,privat
         )
         val state = MessageHistory("Received", "just received" ,message = m)
         m.addState(state)
-        return messageRepository.save(m).toDto()
+        val mess =messageRepository.save(m)
+        kafkaTemplate.send("MESSAGE",mess.toMessageKafkaDTO() )
+        return mess.toDto()
     }
 
     override fun listAll(): List<MessageDTO> {
@@ -128,7 +133,9 @@ class MessageServiceImpl(private val messageRepository: MessageRepository,privat
             }
             else -> throw InvalidStateException("Invalid state with value: $state")
         }
-        return messageRepository.save(message)
+        val mess =messageRepository.save(message)
+        kafkaTemplate.send("MESSAGE",mess.toMessageKafkaDTO() )
+        return mess
     }
 
     override fun notify(oldState: String, newState: String, email: SendEmailDTO): String? {

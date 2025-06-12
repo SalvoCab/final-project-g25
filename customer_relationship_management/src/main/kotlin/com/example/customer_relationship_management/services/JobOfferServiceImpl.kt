@@ -5,7 +5,9 @@ package com.example.customer_relationship_management.services
 import com.example.customer_relationship_management.controllers.InvalidStateException
 import com.example.customer_relationship_management.dtos.JobOfferCandidateDTO
 import com.example.customer_relationship_management.dtos.JobOfferDTO
+import com.example.customer_relationship_management.dtos.JobOfferKafkaDTO
 import com.example.customer_relationship_management.dtos.toDto
+import com.example.customer_relationship_management.dtos.toJobOfferKafkaDTO
 import com.example.customer_relationship_management.entities.Customer
 import com.example.customer_relationship_management.entities.JobOffer
 import com.example.customer_relationship_management.entities.JobOfferCandidate
@@ -18,6 +20,7 @@ import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.CriteriaQuery
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Root
+import org.springframework.kafka.core.KafkaTemplate
 
 import org.springframework.stereotype.Service
 
@@ -25,7 +28,8 @@ import org.springframework.stereotype.Service
 class JobOfferServiceImpl (
     private val jobOfferRepository: JobOfferRepository,
     private val entityManager: EntityManager,
-    private val jobOfferCandidateRepository: JobOfferCandidateRepository
+    private val jobOfferCandidateRepository: JobOfferCandidateRepository,
+    private val kafkaTemplate: KafkaTemplate<String, JobOfferKafkaDTO>
 ) : JobOfferService {
     override fun createJobOffer(
         description: String,
@@ -42,7 +46,9 @@ class JobOfferServiceImpl (
 
             jb.addSkill(skill)
         }
-        return jobOfferRepository.save(jb)
+        val offer = jobOfferRepository.save(jb)
+        kafkaTemplate.send("JOB_OFFER-CREATE",offer.toJobOfferKafkaDTO())
+        return offer
     }
 
     override fun findById(id: Long): JobOffer {
@@ -156,7 +162,9 @@ class JobOfferServiceImpl (
         jobOffer.description = if (description != "") description else jobOffer.description
         jobOffer.notes = if (notes != "") notes else jobOffer.notes
         jobOffer.duration = if (duration > 0) duration else jobOffer.duration
-        return jobOfferRepository.save(jobOffer)
+        val offer = jobOfferRepository.save(jobOffer)
+        kafkaTemplate.send("JOB_OFFER-UPDATE",offer.toJobOfferKafkaDTO())
+        return offer
     }
 
     override fun updateJobOfferStatus(state: String, notes: String?,professional: Professional?, jobOffer: JobOffer): JobOffer {
@@ -233,8 +241,9 @@ class JobOfferServiceImpl (
             }
             else -> throw InvalidStateException("Invalid state with value: $state")
         }
-
-        return jobOfferRepository.save(jobOffer)
+        val offer = jobOfferRepository.save(jobOffer)
+        kafkaTemplate.send("JOB_OFFER-UPDATE",offer.toJobOfferKafkaDTO())
+        return offer
     }
 
     override fun deleteJobOffer(jobOffer: JobOffer) : JobOffer{

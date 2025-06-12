@@ -20,12 +20,6 @@ services:
     networks:
       - kfk-net
       - keycloak
-    healthcheck:
-      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'" ]
-      start_period: 60s
-      interval: 5s
-      timeout: 1s
-      retries: 10
 
   kafka:
     image: 'bitnami/kafka:3.7'
@@ -38,19 +32,13 @@ services:
       - KAFKA_CFG_NODE_ID=0
       - KAFKA_CFG_PROCESS_ROLES=controller,broker
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:29092,CONTROLLER://:9093,PLAINTEXT_HOST://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
     networks:
       - kfk-net
-    healthcheck:
-      test: kafka-topics.sh --bootstrap-server localhost:9092 --list
-      start_period: 10s
-      interval: 5s
-      timeout: 5s
-      retries: 10
 
   kafka-ui:
     container_name: kafka-ui
@@ -63,13 +51,6 @@ services:
       DYNAMIC_CONFIG_ENABLED: 'true'
     networks:
       - kfk-net
-    healthcheck:
-      test: wget --spider -q http://localhost:8080/ || exit 1
-      start_period: 5s
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
 #  api_gateway_app:
 #    build: ./api_gateway
 #    image: 'api_gateway:latest'
@@ -173,12 +154,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - postgres
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "mydatabase"]
-      start_period: 1s
-      interval: 5s
-      timeout: 5s
-      retries: 10
 
 #  analytics:
 #    build: ./analytics

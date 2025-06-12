@@ -13,10 +13,11 @@ spring:
     username: myuser
     password: secret
     driver-class-name: org.postgresql.Driver
-  kafka.consumer:
-     bootstrap-servers: localhost:9092
-     group-id: consumer
-     auto-offset-reset: earliest
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: consumer
+      auto-offset-reset: earliest
 
   security:
     oauth2:

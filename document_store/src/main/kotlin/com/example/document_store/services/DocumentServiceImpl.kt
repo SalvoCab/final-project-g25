@@ -7,17 +7,19 @@ import com.example.document_store.entities.DocumentContent
 import com.example.document_store.entities.DocumentMetadata
 import com.example.document_store.repositories.DocumentRepository
 import jakarta.transaction.Transactional
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import java.util.Optional
 @Service
-class DocumentServiceImpl(private val documentRepository: DocumentRepository) : DocumentService{
+class DocumentServiceImpl(private val documentRepository: DocumentRepository, private val kafkaTemplate: KafkaTemplate<String, DocumentMetadataDTO>) : DocumentService{
 
     @Transactional
     override fun saveDocument(name: String, size: Long, contentType: String, content: ByteArray): DocumentMetadata {
         val documentMetadata = DocumentMetadata(name,size,contentType)
         val documentContent = DocumentContent(documentMetadata.getId(), documentMetadata,content)
         documentMetadata.documentContent = documentContent
-        documentRepository.save(documentMetadata)
+        val doc = documentRepository.save(documentMetadata)
+        kafkaTemplate.send("DOCUMENT", doc.toDto())
         return documentMetadata
     }
 
