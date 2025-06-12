@@ -13,11 +13,11 @@ import org.springframework.stereotype.Service
 
 @Service
 class ProfessionalServiceImpl (private val professionalRepository: ProfessionalRepository, private val entityManager: EntityManager) : ProfessionalService {
-    override fun listPaginated(offset: Int, limit: Int,skills: List<Long>?, location: String, state: String): List<ProfessionalDTO> {
+    override fun listPaginated(offset: Int, limit: Int,skills: List<Long>?, location: String, state: String, keyword:String): List<ProfessionalDTO> {
         val criteriaBuilder: CriteriaBuilder = entityManager.criteriaBuilder
         val criteriaQuery: CriteriaQuery<Professional> = criteriaBuilder.createQuery(Professional::class.java)
         val root: Root<Professional> = criteriaQuery.from(Professional::class.java)
-
+        val contactJoin = root.join<Professional, Contact>("contact")
         val predicates = mutableListOf<Predicate>()
 
         if (!skills.isNullOrEmpty()) {
@@ -37,7 +37,15 @@ class ProfessionalServiceImpl (private val professionalRepository: ProfessionalR
             val stateLowerCase = state.lowercase()
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get<String>("state")), "%$stateLowerCase%"))
         }
+        if (keyword.isNotBlank()) {
+            val keywordLowerCase = keyword.lowercase()
 
+            val keywordPredicate = criteriaBuilder.or(
+                criteriaBuilder.like(criteriaBuilder.lower(contactJoin.get("name")), "%$keywordLowerCase%"),
+                criteriaBuilder.like(criteriaBuilder.lower(contactJoin.get("surname")), "%$keywordLowerCase%")
+            )
+            predicates.add(keywordPredicate)
+        }
         val finalPredicate = criteriaBuilder.and(*predicates.toTypedArray())
         criteriaQuery.where(finalPredicate)
         val query = entityManager.createQuery(criteriaQuery)

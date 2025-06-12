@@ -6,7 +6,7 @@ import com.example.customer_relationship_management.entities.Customer
 
 interface CustomerService {
 
-    fun listPaginated(offset: Int, limit: Int) : List<CustomerDTO>
+    fun listPaginated(offset: Int, limit: Int , keyword : String) : List<CustomerDTO>
 
     fun createCustomer(notes:String?, contact: Contact): Customer
 

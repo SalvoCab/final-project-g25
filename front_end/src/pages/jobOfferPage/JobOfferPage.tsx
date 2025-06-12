@@ -60,7 +60,7 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
     setLoading(true);
 
     if (localJobOffer.state === "Created" && localJobOffer.skills.length > 0) {
-      listProfessionals(0, 20, localJobOffer.skills.map(it => it.id),"", "available_for_work")
+      listProfessionals({page:0,limit:20, skills:localJobOffer.skills.map(it => it.id),location:"",state:"available_for_work",keyword:""})
           .then(setProfessionals)
           .finally(() => setLoading(false));
     } else if (localJobOffer.state === "Selection Phase") {
@@ -570,9 +570,6 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
         )}
         {localJobOffer.state === "Consolidated" && (
             <div className="d-flex justify-content-start gap-2 mt-4">
-              <Button variant="danger" onClick={handleAbort}>
-                Abort
-              </Button>
               <Button variant="success" onClick={async () => {
                 setSaving(true);
                 try {

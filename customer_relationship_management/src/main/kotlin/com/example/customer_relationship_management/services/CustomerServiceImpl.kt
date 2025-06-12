@@ -13,16 +13,35 @@ import org.springframework.stereotype.Service
 
 @Service
 class CustomerServiceImpl (private val customerRepository: CustomerRepository, private val entityManager: EntityManager) : CustomerService{
-    override fun listPaginated(offset: Int, limit: Int): List<CustomerDTO> {
-        val criteriaBuilder: CriteriaBuilder = entityManager.criteriaBuilder
-        val criteriaQuery: CriteriaQuery<Customer> = criteriaBuilder.createQuery(Customer::class.java)
-        val root: Root<Customer> = criteriaQuery.from(Customer::class.java)
+    override fun listPaginated(offset: Int, limit: Int, keyword: String): List<CustomerDTO> {
+        val criteriaBuilder = entityManager.criteriaBuilder
+        val criteriaQuery = criteriaBuilder.createQuery(Customer::class.java)
+        val root = criteriaQuery.from(Customer::class.java)
 
-        criteriaQuery.select(root)
+        // Fai la JOIN con Contact
+        val contactJoin = root.join<Customer, Contact>("contact")
+
+        val predicates = mutableListOf<Predicate>()
+
+        if (keyword.isNotBlank()) {
+            val keywordLowerCase = keyword.lowercase()
+
+            val keywordPredicate = criteriaBuilder.or(
+                criteriaBuilder.like(criteriaBuilder.lower(contactJoin.get("name")), "%$keywordLowerCase%"),
+                criteriaBuilder.like(criteriaBuilder.lower(contactJoin.get("surname")), "%$keywordLowerCase%")
+            )
+            predicates.add(keywordPredicate)
+        }
+
+        if (predicates.isNotEmpty()) {
+            criteriaQuery.where(criteriaBuilder.and(*predicates.toTypedArray()))
+        }
+
+        criteriaQuery.select(root).distinct(true) // distinct per evitare duplicati
 
         val query = entityManager.createQuery(criteriaQuery)
-        query.maxResults = limit
         query.firstResult = offset
+        query.maxResults = limit
 
         return query.resultList.map { it.toDto() }
     }

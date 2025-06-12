@@ -2,23 +2,25 @@ import {CreateProfessionalDTO, ProfessionalDetails, ProfessionalDTO} from "../ob
 import {customFetch} from "./apiUtils.tsx";
 
 
-function buildQueryParams(params: Record<string, any>): string {
-    const esc = encodeURIComponent;
-    return Object.keys(params)
-        .filter(key => params[key] !== undefined && params[key] !== null && params[key] !== "")
-        .map(k => `${esc(k)}=${esc(params[k])}`)
-        .join("&");
-}
+
 
 // 1. Lista paginata
-export function listProfessionals(
-    page = 0,
-    limit = 20,
-    skills: number[] = [],
-    location = "",
-    state = ""
-): Promise<ProfessionalDTO[]> {
-    const query = buildQueryParams({ page, limit, skills, location, state });
+export function listProfessionals(params: {
+    page?: number;
+    limit?: number;
+    skills?: number[];
+    location?: string;
+    state?: string;
+    keyword?: string;
+}): Promise<ProfessionalDTO[]> {
+    const query = new URLSearchParams({
+        page: String(params.page ?? 0),
+        limit: String(params.limit ?? 20),
+        skills: params.skills?.join(",") ?? "",
+        location: params.location ?? "",
+        state: params.state ?? "",
+        keyword: params.keyword ?? "",
+    }).toString();
     return customFetch<ProfessionalDTO[]>(`/crm/professionals?${query}`);
 }
 

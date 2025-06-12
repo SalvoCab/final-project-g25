@@ -7,7 +7,7 @@ import com.example.customer_relationship_management.entities.Skill
 
 interface ProfessionalService {
 
-    fun listPaginated(offset: Int, limit: Int, skills: List<Long>?, location: String, state: String) : List<ProfessionalDTO>
+    fun listPaginated(offset: Int, limit: Int, skills: List<Long>?, location: String, state: String, keyword:String) : List<ProfessionalDTO>
 
     fun createProfessional(location: String, state: String, dailyRate: Double, skills: List<Skill>?, contact: Contact): Professional
 

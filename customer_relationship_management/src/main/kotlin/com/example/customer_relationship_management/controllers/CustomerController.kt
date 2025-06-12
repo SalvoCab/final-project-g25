@@ -18,9 +18,10 @@ class CustomerController(private val customerService: CustomerService, private v
     @GetMapping("/","")
     @ResponseStatus(HttpStatus.OK)
     fun listAll(@RequestParam(defaultValue = "0") page: Int,
-                @RequestParam(defaultValue = "20") limit : Int): List<CustomerDTO> {
+                @RequestParam(defaultValue = "20") limit : Int,
+                @RequestParam(defaultValue = "") keyword : String): List<CustomerDTO> {
         val offset = page * limit
-        return customerService.listPaginated(offset, limit)
+        return customerService.listPaginated(offset, limit, keyword)
     }
 
     @PostMapping("/{contactId}")

@@ -7,10 +7,12 @@ import { customFetch } from "./apiUtils.tsx";
 export async function listCustomers(params: {
     page?: number;
     limit?: number;
+    keyword?: string;
 }): Promise<CustomerDTO[]> {
     const query = new URLSearchParams({
         page: String(params.page ?? 0),
         limit: String(params.limit ?? 20),
+        keyword: params.keyword ?? "",
     }).toString();
     return customFetch(`/crm/customers?${query}`);
 }

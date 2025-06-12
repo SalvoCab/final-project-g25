@@ -6,7 +6,7 @@ import {
 import { listCustomers } from "../../apis/apiCustomer.tsx";
 import {createSkill, listAllSkills} from "../../apis/apiSkill.tsx";
 import { ensureCSRFToken } from "../../apis/apiUtils.tsx";
-import { Container, Row, Col, Card, Button, Badge, Spinner, Alert, Modal, Form } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Spinner, Alert, Modal, Form } from 'react-bootstrap';
 import { BsClock, BsCash, BsListCheck, BsFileText } from 'react-icons/bs';
 import './JobOfferList.css';
 import Select, {MultiValue} from 'react-select';
@@ -14,8 +14,8 @@ import { CreateJobOffer, JobOffer } from "../../objects/JobOffer.ts";
 import { CustomerDTO } from "../../objects/Customer.ts";
 import { SkillDTO } from "../../objects/Skill.ts";
 import JobOfferPage from "./JobOfferPage.tsx";
-import {ContactDTO} from "../../objects/Contact.ts";
-import {listContacts} from "../../apis/apiContact.tsx";
+import {listProfessionals} from "../../apis/apiProfessional.tsx";
+import {ProfessionalDTO} from "../../objects/Professional.ts";
 
 
 export default function ListJobOffers() {
@@ -41,10 +41,10 @@ export default function ListJobOffers() {
     const [filtering, setFiltering] = useState(false);
     const [appliedFilters, setAppliedFilters] = useState(filters);
     const hasActiveFilters = Object.values(appliedFilters).some(val => val !== "" && val !== 0);
-    const [customerSelected, setCustomerSelected] = useState<ContactDTO | null>(null);
-    const [professionalSelected, setProfessionalSelected] = useState<ContactDTO | null>(null);
-    const [filterCustomers, setFilterCustomers] = useState<ContactDTO[]>([]);
-    const [filterProfessionals, setFilterProfessionals] = useState<ContactDTO[]>([]);
+    const [customerSelected, setCustomerSelected] = useState<CustomerDTO | null>(null);
+    const [professionalSelected, setProfessionalSelected] = useState<ProfessionalDTO | null>(null);
+    const [filterCustomers, setFilterCustomers] = useState<CustomerDTO[]>([]);
+    const [filterProfessionals, setFilterProfessionals] = useState<ProfessionalDTO[]>([]);
     const [keywordCustomerFilter, setKeywordCustomerFilter] = useState<string>("");
     const [keywordProfessionalFilter, setKeywordProfessionalFilter] = useState<string>("");
     const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
@@ -55,6 +55,24 @@ export default function ListJobOffers() {
     const [newSkillName, setNewSkillName] = useState("");
 
     const [limit, setLimit] = useState(20);
+    const getCategoryStyle = (category: string): React.CSSProperties => {
+        switch (category.toLowerCase()) {
+            case "created":
+                return { backgroundColor: "#cff4fc", color: "#055160", borderRadius: "10px", padding: "2px 8px", display: "inline-block" }; // azzurrino
+            case "selection phase":
+                return { backgroundColor: "#fff3cd", color: "#664d03", borderRadius: "10px", padding: "2px 8px", display: "inline-block" }; // giallo tenue
+            case "candidate proposal":
+                return { backgroundColor: "#e2e3e5", color: "#41464b", borderRadius: "10px", padding: "2px 8px", display: "inline-block" }; // grigio neutro
+            case "consolidated":
+                return { backgroundColor: "#e7e0f8", color: "#3d2c6d", borderRadius: "10px", padding: "2px 8px", display: "inline-block" }; // lilla tenue
+            case "done":
+                return { backgroundColor: "#d1e7dd", color: "#0f5132", borderRadius: "10px", padding: "2px 8px", display: "inline-block" }; // verde
+            case "aborted":
+                return { backgroundColor: "#f8d7da", color: "#842029", borderRadius: "10px", padding: "2px 8px", display: "inline-block" }; // rosso
+            default:
+                return { backgroundColor: "#f8d7da", color: "#842029", borderRadius: "10px", padding: "2px 8px", display: "inline-block" }; // fallback grigio chiaro
+        }
+    };
 
     useEffect(() => {
         loadOffers();
@@ -92,16 +110,13 @@ export default function ListJobOffers() {
         try {
             setCustomerSelected(null);
             await ensureCSRFToken();
-            const resultsCustomers = await listContacts({
+            const resultsCustomers = await listCustomers({
                 page: 0,
                 limit: 10000,
-                email: "",
-                address: "",
-                number: "",
                 keyword: keywordCustomerFilter,
             });
 
-            setFilterCustomers(resultsCustomers.filter(c => c.category === "customer"));
+            setFilterCustomers(resultsCustomers);
             await ensureCSRFToken();
         } catch (error) {
             alert("Error fetching contacts. The server is probably just shy.");
@@ -117,15 +132,13 @@ export default function ListJobOffers() {
             setProfessionalSelected(null);
 
             await ensureCSRFToken();
-            const resultsProfessionals = await listContacts({
+            const resultsProfessionals = await listProfessionals({
                 page: 0,
                 limit: 10000,
-                email: "",
-                address: "",
-                number: "",
                 keyword: keywordProfessionalFilter,
-            });
-            setFilterProfessionals(resultsProfessionals.filter(c => c.category === "professional"));
+                }
+            );
+            setFilterProfessionals(resultsProfessionals);
             await ensureCSRFToken();
         } catch (error) {
             alert("Error fetching contacts. The server is probably just shy.");
@@ -139,7 +152,7 @@ export default function ListJobOffers() {
         setError(null);
         setAppliedFilters(filters);
 
-        listJobOffers(page, limit, filters.state, filters.customer, filters.professional)
+        listJobOffers(page, limit, filters.state,filters.customer, filters.professional)
             .then((data) => {
                 setJobOffers(data);
                 setHasMore(data.length >= limit);
@@ -156,6 +169,9 @@ export default function ListJobOffers() {
 
     const handleClearFilters = () => {
         setFilters({state: "", customer: 0, professional: 0});
+        setAppliedFilters({state: "", customer: 0, professional: 0});
+        setCustomerSelected(null);
+        setProfessionalSelected(null);
         loadOffers();
     };
 
@@ -207,14 +223,6 @@ export default function ListJobOffers() {
         formData.duration > 0 &&
         selectedCustomerId !== null;
 
-    const getStatusBadgeVariant = (state: string) => {
-        switch (state.toLowerCase()) {
-            case 'open': return 'success';
-            case 'accepted': return 'primary';
-            case 'aborted': return 'danger';
-            default: return 'secondary';
-        }
-    };
 
 
     const renderJobOfferCard = (job: JobOffer) => (
@@ -227,27 +235,28 @@ export default function ListJobOffers() {
             <Card.Body>
                 <div className="d-flex justify-content-between align-items-start mb-3">
                     <h3 className="h5 mb-0">{job.description}</h3>
-                    <Badge bg={getStatusBadgeVariant(job.state)}>{job.state}</Badge>
+                    <span style={getCategoryStyle(job.state)}>
+                      {job.state.toLowerCase().includes("aborted") ? "Aborted" : job.state}
+                    </span>
                 </div>
                 <Row className="mt-3">
                     <Col md={6}>
                         <div className="d-flex align-items-center mb-2">
-                            <BsClock className="me-2" />
-                            <span>Durata: {job.duration} giorni</span>
+                            <BsClock className="me-2" /><span><b>Duration:</b> {job.duration} days</span>
                         </div>
                         <div className="d-flex align-items-center mb-2">
                             <BsCash className="me-2" />
-                            <span>Valore: €{job.value}</span>
+                            <span><b>Value:</b> €{job.value}</span>
                         </div>
                     </Col>
                     <Col md={6}>
                         <div className="d-flex align-items-center mb-2">
                             <BsListCheck className="me-2" />
-                            <span>Competenze: {job.skills.map(it => it.skill).join(", ") || "Nessuna"}</span>
+                            <span><b> Skills: </b>{job.skills.map(it => it.skill).join(", ") || "Nessuna"}</span>
                         </div>
                         <div className="d-flex align-items-center">
                             <BsFileText className="me-2" />
-                            <span>Note: {job.notes || "Nessuna nota"}</span>
+                            <span><b> Notes: </b>{job.notes || "Nessuna nota"}</span>
                         </div>
                     </Col>
                 </Row>
@@ -341,6 +350,7 @@ export default function ListJobOffers() {
                                         <option value="candidate selection">Candidate Selection</option>
                                         <option value="consolidated">Consolidated</option>
                                         <option value="done">Done</option>
+                                        <option value="aborted">Aborted</option>
 
                                     </Form.Select>
                                 </Form.Group>
@@ -365,12 +375,13 @@ export default function ListJobOffers() {
                                         onChange={(e) => {
                                             const selected = filterCustomers.find(c => c.id === parseInt(e.target.value));
                                             setCustomerSelected(selected ?? null);
+                                            setFilters(prev => ({ ...prev, customer: selected?.id ?? 0 }));
                                         }}
                                     >
                                         <option value="">-- Choose a customer --</option>
                                         {filterCustomers.map(customer => (
                                             <option key={customer.id} value={customer.id}>
-                                                {customer.name} {customer.surname} {customer.emails.length>0 && <>({customer.emails.join(", ")})</>} {customer.phoneNumber.length>0 && <>({customer.phoneNumber.join(", ")})</>}
+                                                {customer.name} {customer.surname}
                                             </option>
                                         ))}
                                     </Form.Select>
@@ -397,12 +408,13 @@ export default function ListJobOffers() {
                                         onChange={(e) => {
                                             const selected = filterProfessionals.find(c => c.id === parseInt(e.target.value));
                                             setProfessionalSelected(selected ?? null);
+                                            setFilters(prev => ({ ...prev, professional: selected?.id ?? 0 }));
                                         }}
                                     >
                                         <option value="">-- Choose a professional--</option>
                                         {filterProfessionals.map(professional => (
                                             <option key={professional.id} value={professional.id}>
-                                                {professional.name} {professional.surname} {professional.emails.length>0 && <>({professional.emails.join(", ")})</>} {professional.phoneNumber.length>0 && <>({professional.phoneNumber.join(", ")})</>}
+                                                {professional.name} {professional.surname}
                                             </option>
                                         ))}
                                     </Form.Select>
@@ -419,12 +431,12 @@ export default function ListJobOffers() {
 
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Crea nuova offerta</Modal.Title>
+                    <Modal.Title>Create Job Offer</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group controlId="description" className="mb-3">
-                            <Form.Label>Descrizione</Form.Label>
+                            <Form.Label>Description</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={formData.description}

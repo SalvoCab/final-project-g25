@@ -22,9 +22,10 @@ class ProfessionalController(private val professionalService: ProfessionalServic
                       @RequestParam(defaultValue = "20") limit : Int,
                       @RequestParam(defaultValue ="") skills: List<Long>,
                       @RequestParam(defaultValue ="") location: String,
-                      @RequestParam(defaultValue ="") state: String): List<ProfessionalDTO> {
+                      @RequestParam(defaultValue ="") state: String,
+                      @RequestParam(defaultValue ="") keyword: String): List<ProfessionalDTO> {
         val offset = page * limit
-        return professionalService.listPaginated(offset, limit,skills, location, state)
+        return professionalService.listPaginated(offset, limit,skills, location, state,keyword)
     }
 
     @PostMapping("/{contactId}")
