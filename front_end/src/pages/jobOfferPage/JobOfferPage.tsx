@@ -89,7 +89,7 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
   const confirmAbort = async () => {
     const abortedState = getAbortedState(localJobOffer.state);
     if (!abortedState) {
-      alert(`La job offer non può essere chiusa dallo stato attuale (${localJobOffer.state})`);
+      alert(`The job offer cannot be closed from the current state: (${localJobOffer.state})`);
       return;
     }
 
@@ -107,8 +107,8 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
         notes: abortNotes,
       }));
     } catch (error) {
-      console.error("Errore durante la chiusura della job offer", error);
-      alert("Si è verificato un errore durante la chiusura della job offer.");
+      console.error("Error while closing the job offer", error);
+      alert("An error occurred while closing the job offer.");
     }
   };
 
@@ -182,10 +182,10 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
 
       const selectedCandidate = candidates[selectedCandidateId];
       if (!selectedCandidate) {
-        throw new Error("Candidato selezionato non valido.");
+        throw new Error("Invalid selected candidate.");
       }
 
-      await updateJobOfferStatus(localJobOffer.id, {
+      const jb = await updateJobOfferStatus(localJobOffer.id, {
         state: "consolidated",
         notes: localJobOffer.notes!,
         professionalId: selectedCandidate.professional.id,
@@ -193,11 +193,12 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
       setLocalJobOffer(prev => ({
         ...prev,
         state: "Consolidated",
+        value:jb.value,
         professional: selectedCandidate.professional.id
       }));
 
     } catch (err) {
-      setError("Errore durante la conferma del candidato.");
+      setError("Error while confirming the candidate.");
       console.error(err);
     } finally {
       setSaving(false);
@@ -255,8 +256,8 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
         }));
       }
     } catch (err) {
-      console.error("Errore durante il salvataggio:", err);
-      setError("Si è verificato un errore durante il salvataggio.");
+      console.error("Error during save:", err);
+      setError("An error occurred while saving.");
     } finally {
       setSaving(false);
     }
@@ -266,10 +267,10 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
 
     <div>
       <Button variant="outline-secondary" onClick={onBack}>
-        ← Torna alla lista
+        ← Back to list
       </Button>
 
-      {/* Stato della job offer */}
+      {/* Job offer status */}
       <div className="d-flex justify-content-center mt-4 mb-4">
         {states.map((state, index) => {
           let color = "lightgray";
@@ -288,14 +289,14 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
             if (index < abortedCount) {
               color = "green";
               icon = <FaCheck color="white" />;
-              label = states[index]; // Mantieni lo stato corretto
+              label = states[index];
             } else if (index === abortedCount) {
               color = "red";
               icon = <FaTimes color="white" />;
               label = "Aborted";
             } else {
               color = "lightgray";
-              label = ""; // Nessuna label dopo l’aborted
+              label = "";
             }
           } else {
             if (index <= currentIndex) {
@@ -306,7 +307,6 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
             }
           }
 
-          // Preparazione del connettore tra i pallini
           let nextColor = "lightgray";
           if (index < states.length - 1) {
             if (isAborted) {
@@ -332,7 +332,6 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
           return (
               <div key={state} className="d-flex flex-column ">
                 <div className="d-flex align-items-center">
-                  {/* Pallino */}
                   <div
                       style={{
                         width: 40,
@@ -347,13 +346,11 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
                     {icon}
                   </div>
 
-                  {/* Connettore */}
                   {index < states.length - 1 && (
                       <div style={connectorStyle} />
                   )}
                 </div>
 
-                {/* Etichetta sotto */}
                 <div style={{ marginTop: 5, fontSize: "0.85rem", textAlign: "start", minWidth: 60 }}>
                   {label}
                 </div>
@@ -367,22 +364,20 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
 
 
 
-  {/* Dettagli offerta */}
         <Card className="mt-3">
           <Card.Body>
             <h2>{localJobOffer.description}</h2>
-            <p><strong>Durata:</strong> {localJobOffer.duration} giorni</p>
-            <p><strong>Valore:</strong> €{localJobOffer.value}</p>
-            <p><strong>Competenze:</strong> {localJobOffer.skills.map(it => it.skill).join(", ")}</p>
-            <p><strong>Note:</strong> {localJobOffer.notes || "Nessuna nota"}</p>
+            <p><strong>Duration:</strong> {localJobOffer.duration} days</p>
+            <p><strong>Value:</strong> €{localJobOffer.value?.toFixed(2)}</p>
+            <p><strong>Skills:</strong> {localJobOffer.skills.map(it => it.skill).join(", ")}</p>
+            <p><strong>Notes:</strong> {localJobOffer.notes || "Nessuna nota"}</p>
           </Card.Body>
         </Card>
 
-        {/* Sezione selezione professionisti */}
         {localJobOffer.state === "Created" && (
             <Card className="mt-4">
               <Card.Body>
-                <h4>Seleziona professionisti compatibili</h4>
+                <h4>Select compatible professionals</h4>
                 {loading ? (
                     <div className="text-center mt-3">
                       <Spinner animation="border" />
@@ -399,18 +394,18 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
                             />
                             {pro.id in selectedProfessionals && (
                                 <Form.Group className="mt-2">
-                                  <Form.Label>Note</Form.Label>
+                                  <Form.Label>Notes</Form.Label>
                                   <Form.Control
                                       type="text"
                                       value={selectedProfessionals[pro.id].notes}
                                       onChange={(e) => updateNote(pro.id, e.target.value)}
-                                      placeholder="Aggiungi una nota per questo professionista"
+                                      placeholder="Add a note for this professional"
                                   />
                                 </Form.Group>
                             )}
                           </ListGroup.Item>
                       ))}
-                      {professionals.length === 0 && <p>Nessun professionista trovato.</p>}
+                      {professionals.length === 0 && <p>No professionals found.</p>}
                     </ListGroup>
                 )}
               </Card.Body>
@@ -419,21 +414,21 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
         {localJobOffer.state === "Created" && (
             <div className="d-flex justify-content-start gap-2 mt-3">
               <Button variant="danger" onClick={handleAbort}>
-                Annulla
+                Abort
               </Button>
               <Button
                   variant="primary"
                   onClick={handleOpenModal}
                   disabled={Object.keys(selectedProfessionals).length === 0 || saving}
               >
-                {saving ? <Spinner size="sm" animation="border" /> : "Salva"}
+                {saving ? <Spinner size="sm" animation="border" /> : "Save"}
               </Button>
             </div>
         )}
         {localJobOffer.state === "Selection Phase" && (
             <Card className="mt-4">
               <Card.Body>
-                <h4>Candidati in valutazione</h4>
+                <h4>Candidates under evaluation</h4>
                 <ListGroup>
                   {Object.entries(candidates).map(([id, data]) => {
                     const candidate: CandidateDTO | undefined = Object.values(candidates).find(
@@ -448,7 +443,7 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
                                 <b>{candidate.professional.name} {candidate.professional.surname}</b>{" "}
                                 <span style={getCategoryStyle(candidate.status)}>{candidate.status}</span>
                               </p>
-                              <p><b>Daily rate:</b> {candidate.professional.dailyRate} €</p>
+                              <p><b>Daily rate:</b> {candidate.professional.dailyRate.toFixed(2)} €</p>
                               <p><b>Location:</b> {candidate.professional.location}</p>
                               <p><b>Skills:</b> {candidate.professional.skills.join(", ")}</p>
                               <Form.Control
@@ -457,7 +452,7 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
                                   className="mt-2 w-100"
                                   value={data.note}
                                   onChange={(e) => updateCandidateNote(parseInt(id), e.target.value)}
-                                  placeholder="Aggiungi una nota per questo professionista"
+                                  placeholder="Add a note for this professional"
                               />
                             </div>
                             <div className="btn-group">
@@ -479,7 +474,7 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
                     );
                   })}
 
-                  {Object.keys(candidates).length === 0 && <p>Nessun candidato disponibile.</p>}
+                  {Object.keys(candidates).length === 0 && <p>No candidates available.</p>}
                 </ListGroup>
               </Card.Body>
             </Card>
@@ -488,21 +483,21 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
         {localJobOffer.state === "Selection Phase" && (
             <div className="d-flex justify-content-start gap-2 mt-3">
               <Button variant="danger" onClick={handleAbort}>
-                Annulla
+                Abort
               </Button>
               <Button
                   className="btn-custom"
                   onClick={handleOpenModal}
                   disabled={!hasAcceptedCandidates || saving}
               >
-                {saving ? <Spinner size="sm" animation="border" /> : "Salva"}
+                {saving ? <Spinner size="sm" animation="border" /> : "Save"}
               </Button>
             </div>
         )}
         {localJobOffer.state === "Candidate Proposal" && (
             <Card className="mt-4">
               <Card.Body>
-                <h4>Seleziona un candidato da ingaggiare</h4>
+                <h4>Select a candidate to hire</h4>
                 {loading ? (
                     <div className="text-center mt-3">
                       <Spinner animation="border" />
@@ -521,11 +516,11 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
                                       <strong>{candidate.professional.name} {candidate.professional.surname}</strong> —
                                       <span className="ms-2" style={getCategoryStyle(candidate.status)}>{candidate.status}</span>
                                       <br />
-                                      <small><b>Daily rate:</b> {candidate.professional.dailyRate} € | <b>Location:</b> {candidate.professional.location}</small>
+                                      <small><b>Daily rate:</b> {candidate.professional.dailyRate.toFixed(2)} € | <b>Location:</b> {candidate.professional.location}</small>
                                       <br />
                                       <small><b>Skills:</b> {candidate.professional.skills.join(", ")}</small>
                                       <br />
-                                      <small><b>Note:</b> {candidate.note || "Nessuna nota"}</small>
+                                      <small><b>Notes:</b> {candidate.note || "No notes"}</small>
                                     </>
                                   }
                                   checked={selectedCandidateId === parseInt(id)}
@@ -534,7 +529,7 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
                             </ListGroup.Item>
                         ))}
                         {Object.keys(candidates).length === 0 && (
-                            <p className="mt-3">Nessun candidato disponibile.</p>
+                            <p className="mt-3">No candidates available.</p>
                         )}
                       </ListGroup>
                     </Form>
@@ -546,7 +541,7 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
         {localJobOffer.state === "Candidate Proposal" && (
             <div className="d-flex justify-content-start gap-2 mt-3">
               <Button variant="danger" onClick={handleAbort}>
-                Annulla
+                Abort
               </Button>
               <Button
                   variant="success"
@@ -560,11 +555,11 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
         {selectedCandidate &&(
             <Card className="mt-4">
               <Card.Body>
-                <h4>Professionista selezionato</h4>
-                <p><strong>Nome:</strong> {selectedCandidate.professional.name} {selectedCandidate.professional.surname}</p>
-                <p><strong>Tariffa giornaliera:</strong> €{selectedCandidate.professional.dailyRate}</p>
-                <p><strong>Località:</strong> {selectedCandidate.professional.location}</p>
-                <p><strong>Competenze:</strong> {selectedCandidate.professional.skills.join(", ")}</p>
+                <h4>Selected professional</h4>
+                <p><strong>Name:</strong> {selectedCandidate.professional.name} {selectedCandidate.professional.surname}</p>
+                <p><strong>Daily rate:</strong> €{selectedCandidate.professional.dailyRate.toFixed(2)}</p>
+                <p><strong>Location:</strong> {selectedCandidate.professional.location}</p>
+                <p><strong>Skills:</strong> {selectedCandidate.professional.skills.join(", ")}</p>
               </Card.Body>
             </Card>
         )}
@@ -584,24 +579,24 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
                     state: "Done",
                   }));
                 } catch (err) {
-                  console.error("Errore nel completamento:", err);
-                  alert("Errore durante il completamento dell'offerta.");
+                  console.error("Error:", err);
+                  alert("Error while completing the job offer.");
                 } finally {
                   setSaving(false);
                 }
               }}>
-                {saving ? <Spinner size="sm" animation="border" /> : "Close"}
+                {saving ? <Spinner size="sm" animation="border" /> : "Close Job Offer"}
               </Button>
             </div>
         )}
         {error && <p className="text-danger mt-2">{error}</p>}
         <Modal show={showModal} onHide={() => setShowModal(false)}>
           <Modal.Header closeButton>
-            <Modal.Title>Modifica note dell'offerta</Modal.Title>
+            <Modal.Title>Edit job offer notes</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form.Group>
-              <Form.Label>Note</Form.Label>
+              <Form.Label>Notes</Form.Label>
               <Form.Control
                   as="textarea"
                   rows={4}
@@ -612,41 +607,41 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Annulla
+              Cancel
             </Button>
             <Button variant="primary" onClick={handleConfirmSave}>
-              Conferma e salva
+              Save and Confirm
             </Button>
           </Modal.Footer>
         </Modal>
 
-        <Modal show={showEnroleModal} onHide={() => setShowEnroleModal(false)}>
-          <Modal.Header closeButton>
-            <Modal.Title>Conferma assegnazione</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            Stai per assegnare <strong>in via definitiva</strong> il candidato selezionato a questa job offer.<br />
-            Tutti gli altri candidati verranno automaticamente <strong>scartati</strong>.<br /><br />
-            Vuoi procedere?
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowEnroleModal(false)}>
-              Annulla
-            </Button>
-            <Button variant="primary" onClick={() => handleConfirmEnrole()}>
-              Conferma
-            </Button>
-          </Modal.Footer>
-        </Modal>
+      <Modal show={showEnroleModal} onHide={() => setShowEnroleModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Hiring</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          You are about to <strong>permanently assign</strong> the selected candidate to this job offer.<br />
+          All other candidates will automatically be <strong>discarded</strong>.<br /><br />
+          Do you want to proceed?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowEnroleModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={() => handleConfirmEnrole()}>
+            Confirm
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <Modal show={showAbortModal} onHide={() => setShowAbortModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Chiudi Job Offer</Modal.Title>
+          <Modal.Title>Close Job Offer</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Sei sicuro di voler chiudere questa job offer? Puoi modificare le note prima di confermare.</p>
+          <p>Are you sure you want to close this job offer? You can edit the notes before confirming.</p>
           <Form.Group controlId="abortNotes">
-            <Form.Label>Note</Form.Label>
+            <Form.Label>Notes</Form.Label>
             <Form.Control
                 as="textarea"
                 rows={4}
@@ -657,13 +652,14 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowAbortModal(false)}>
-            Annulla
+            Cancel
           </Button>
           <Button variant="danger" onClick={confirmAbort}>
-            Conferma chiusura
+            Confirm Closure
           </Button>
         </Modal.Footer>
       </Modal>
-      </div>
+
+    </div>
   );
 }

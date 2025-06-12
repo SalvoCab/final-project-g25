@@ -6,7 +6,7 @@ export interface JobOffer{
     state: string,
     notes?: string,
     duration: number,
-    value?: string,
+    value?: number,
     customer?: number,
     professional?: number,
     skills : {id:number,skill:string}[]

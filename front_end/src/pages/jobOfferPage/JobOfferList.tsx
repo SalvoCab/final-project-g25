@@ -159,7 +159,7 @@ export default function ListJobOffers() {
                 ensureCSRFToken();
             })
             .catch((err: any) => {
-                setError(err.message || "Errore durante il caricamento delle offerte");
+                setError(err.message || "Error while loading job offers");
                 setJobOffers([]);
                 setHasMore(false);
             })
@@ -191,7 +191,7 @@ export default function ListJobOffers() {
                 ensureCSRFToken();
             })
             .catch((err: any) => {
-                setError(err.message || "Errore durante il caricamento delle offerte");
+                setError(err.message || "Error while loading job offers");
                 setJobOffers([]);
                 setHasMore(false);
             })
@@ -208,7 +208,7 @@ export default function ListJobOffers() {
                 setNewSkillName("");
                 loadOffers();
             })
-            .catch(err => setError(err.message || "Errore durante la creazione dell'offerta"));
+            .catch(err => setError(err.message || "Error during job offer creation"));
     };
 
     const handleSkillsChange = (
@@ -221,7 +221,7 @@ export default function ListJobOffers() {
     const isFormValid = formData.description.trim() !== "" &&
         formData.notes?.trim() !== "" &&
         formData.duration > 0 &&
-        selectedCustomerId !== null;
+        selectedCustomerId !== 0;
 
 
 
@@ -246,17 +246,17 @@ export default function ListJobOffers() {
                         </div>
                         <div className="d-flex align-items-center mb-2">
                             <BsCash className="me-2" />
-                            <span><b>Value:</b> €{job.value}</span>
+                            <span><b>Value:</b> €{job.value?.toFixed(2)}</span>
                         </div>
                     </Col>
                     <Col md={6}>
                         <div className="d-flex align-items-center mb-2">
                             <BsListCheck className="me-2" />
-                            <span><b> Skills: </b>{job.skills.map(it => it.skill).join(", ") || "Nessuna"}</span>
+                            <span><b> Skills: </b>{job.skills.map(it => it.skill).join(", ") || "None"}</span>
                         </div>
                         <div className="d-flex align-items-center">
                             <BsFileText className="me-2" />
-                            <span><b> Notes: </b>{job.notes || "Nessuna nota"}</span>
+                            <span><b> Notes: </b>{job.notes || "No Notes"}</span>
                         </div>
                     </Col>
                 </Row>
@@ -296,7 +296,7 @@ export default function ListJobOffers() {
                     {loading && (
                         <div className="text-center py-5">
                             <Spinner animation="border" role="status">
-                                <span className="visually-hidden">Caricamento...</span>
+                                <span className="visually-hidden">Loading...</span>
                             </Spinner>
                         </div>
                     )}
@@ -304,7 +304,7 @@ export default function ListJobOffers() {
                     {error && <Alert variant="danger">{error}</Alert>}
 
                     {!loading && !error && jobOffers.length === 0 && (
-                        <Alert variant="info">Nessuna offerta trovata.</Alert>
+                        <Alert variant="info">No offers found.</Alert>
                     )}
 
                     {!loading && !error && jobOffers.map(renderJobOfferCard)}
@@ -444,7 +444,7 @@ export default function ListJobOffers() {
                             />
                         </Form.Group>
                         <Form.Group controlId="notes" className="mb-3">
-                            <Form.Label>Note</Form.Label>
+                            <Form.Label>Notes</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 value={formData.notes}
@@ -452,7 +452,7 @@ export default function ListJobOffers() {
                             />
                         </Form.Group>
                         <Form.Group controlId="duration" className="mb-3">
-                            <Form.Label>Durata (giorni)</Form.Label>
+                            <Form.Label>Duration (days)</Form.Label>
                             <Form.Control
                                 type="number"
                                 value={formData.duration}
@@ -461,13 +461,13 @@ export default function ListJobOffers() {
                             />
                         </Form.Group>
                         <Form.Group controlId="customer" className="mb-3">
-                            <Form.Label>Cliente</Form.Label>
+                            <Form.Label>Customer</Form.Label>
                             <Form.Select
                                 value={selectedCustomerId ?? ""}
                                 onChange={(e) => setSelectedCustomerId(parseInt(e.target.value))}
                                 disabled={loadingCustomers || customers.length === 0}
                             >
-                                <option value="">Seleziona un cliente</option>
+                                <option value={0}>Select a customer</option>
                                 {customers.map((cust) => (
                                     <option key={cust.id} value={cust.id}>
                                         {cust.name} {cust.surname}
@@ -479,7 +479,7 @@ export default function ListJobOffers() {
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Competenze</Form.Label>
+                                    <Form.Label>Skills</Form.Label>
                                     <Select
                                         isMulti
                                         options={availableSkills.map(skill => ({
@@ -498,16 +498,15 @@ export default function ListJobOffers() {
                             </Col>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Nuova skill</Form.Label>
+                                    <Form.Label>New skill</Form.Label>
                                     <Form.Control
                                         type="text"
                                         value={newSkillName}
                                         onChange={(e) => setNewSkillName(e.target.value)}
-                                        placeholder="Inserisci nuova skill"
+                                        placeholder="Insert a new skill"
                                     />
                                     <Button
-                                        variant="secondary"
-                                        className="mt-2"
+                                        className="mt-2 btn-custom"
                                         onClick={async () => {
                                             if (!newSkillName.trim()) return;
                                             try {
@@ -520,11 +519,11 @@ export default function ListJobOffers() {
                                                 setNewSkillName("");
                                                 await ensureCSRFToken();
                                             } catch (error) {
-                                                console.error("Errore nella creazione della skill:", error);
+                                                console.error("Error during skill creation:", error);
                                             }
                                         }}
                                     >
-                                        Aggiungi skill
+                                        Add skill
                                     </Button>
                                 </Form.Group>
                             </Col>
@@ -532,8 +531,8 @@ export default function ListJobOffers() {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>Annulla</Button>
-                    <Button variant="primary" onClick={handleAddJobOffer} disabled={!isFormValid}>Crea</Button>
+                    <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+                    <Button className="btn-custom" onClick={handleAddJobOffer} disabled={!isFormValid}>Create</Button>
                 </Modal.Footer>
             </Modal>
         </Container>
