@@ -37,6 +37,8 @@ const ListCustomers: React.FC<ListCustomersProps> = ({ me }) => {
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
     const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
     const [confirmMessage, setConfirmMessage] = useState("");
+    const [keyword, setKeyword] = useState("");
+    const [appliedKeyword, setAppliedKeyword] = useState("");
     const showConfirmation = (message: string, onConfirm: () => void) => {
         setConfirmMessage(message);
         setConfirmAction(() => onConfirm);
@@ -46,7 +48,7 @@ const ListCustomers: React.FC<ListCustomersProps> = ({ me }) => {
     useEffect(() => {
         setLoading(true);
         setError(null);
-        listCustomers({ page, limit })
+        listCustomers({page: page, limit: limit, keyword: appliedKeyword })
             .then(data => {
                 setCustomers(data);
                 setHasMore(data.length === limit);
@@ -57,7 +59,8 @@ const ListCustomers: React.FC<ListCustomersProps> = ({ me }) => {
                 setCustomers([]);
             })
             .finally(() => setLoading(false));
-    }, [page, limit]);
+    }, [page, limit, appliedKeyword]);
+
 
     const handleView = (id: number | null) => {
         if (!id) return;
@@ -93,12 +96,25 @@ const ListCustomers: React.FC<ListCustomersProps> = ({ me }) => {
             }
         });
     };
+    const handleSearch = () => {
+        setPage(0);
+        setAppliedKeyword(keyword);
+    };
+
+    const handleClearFilters = () => {
+        setKeyword("");
+        setAppliedKeyword("");
+        setPage(0);
+    };
+
+    const hasActiveFilters = appliedKeyword !== "";
+
 
     const reloadCustomer = () => {
         setPage(0);
         setLoading(true);
         setError(null);
-        listCustomers({page, limit })
+        listCustomers({page: page, limit: limit , keyword: appliedKeyword})
             .then((data) => {
                 setCustomers(data);
                 setHasMore(data.length === limit);
@@ -147,7 +163,7 @@ const ListCustomers: React.FC<ListCustomersProps> = ({ me }) => {
     return (
         <Container fluid className="py-4">
             <Row>
-                <Col md={12}>
+                <Col md={9}>
                     <h2 className="mb-4">Customers</h2>
 
                     {canAddEdit && (
@@ -191,6 +207,32 @@ const ListCustomers: React.FC<ListCustomersProps> = ({ me }) => {
                             <Button className="btn-custom" onClick={() => setPage((p) => p + 1)} disabled={!hasMore}>Next</Button>
                         </div>
                     )}
+                </Col>
+                {/* Sidebar Filtri */}
+                <Col md={3}>
+                    <div style={{ position: 'sticky', top: '80px' }}>
+                        <Card>
+                            <Card.Header className="bg-white">
+                                <h5 className="mb-0">Filters</h5>
+                            </Card.Header>
+                            <Card.Body>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Keyword</Form.Label>
+                                    <Form.Control
+                                        placeholder="Name or Surname"
+                                        type="text"
+                                        name="keyword"
+                                        value={keyword}
+                                        onChange={(e) => setKeyword(e.target.value)}
+                                    />
+                                </Form.Group>
+                                <Button onClick={handleSearch} className="w-100 btn-custom">Search</Button>
+                                <Button variant="danger" onClick={handleClearFilters} className="w-100 mt-2" disabled={!hasActiveFilters}>
+                                    Remove Filters
+                                </Button>
+                            </Card.Body>
+                        </Card>
+                    </div>
                 </Col>
             </Row>
 

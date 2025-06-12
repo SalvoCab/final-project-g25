@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import {
     Container, Button, Spinner, Alert, Form, Table, Row, Col, Modal
 } from "react-bootstrap";
-import { changeMessageState, listMessages } from "../../apis/apiMessage";
+import {changeMessageState, listMessages, getMessageById, changeMessagePriority} from "../../apis/apiMessage";
 import { MessageDTO } from "../../objects/Message";
 import { ensureCSRFToken } from "../../apis/apiUtils";
+import {BsEye, BsPencilSquare} from "react-icons/bs";
 
 const ListMessages: React.FC = () => {
     const [messages, setMessages] = useState<MessageDTO[]>([]);
@@ -20,6 +21,11 @@ const ListMessages: React.FC = () => {
     const [showActionModal, setShowActionModal] = useState(false);
     const [actionState, setActionState] = useState<string>("");
     const [comment, setComment] = useState<string>("");
+    const [showHistoryModal, setShowHistoryModal] = useState(false);
+    const [editedPriority, setEditedPriority] = useState<number | null>(null);
+    const [savingPriority, setSavingPriority] = useState(false);
+    const [historyData, setHistoryData] = useState<{ state: string, comment: string, date: string }[]>([]);
+
 
     useEffect(() => {
         fetchData();
@@ -68,8 +74,36 @@ const ListMessages: React.FC = () => {
             }
         } else {
             setSelectedMessage(msg);
+            setEditedPriority(msg.priority);
+
         }
     };
+
+    const openHistoryModal = async () => {
+        if (!selectedMessage?.id) return;
+        setLoading(true);
+        try {
+            const data = await getMessageById(selectedMessage.id);
+            setHistoryData(data.history);
+            setShowHistoryModal(true);
+        } catch (err) {
+            console.error(err);
+            setError("Error while fetching message history.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getButtonVariant = (action: string): string => {
+        switch (action.toLowerCase()) {
+            case "processing": return "info";
+            case "done": return "success";
+            case "discarded": return "secondary";
+            case "failed": return "danger";
+            default: return "primary";
+        }
+    };
+
 
     const formatDate = (isoDate: string | null) => {
         if (!isoDate) return "";
@@ -98,7 +132,7 @@ const ListMessages: React.FC = () => {
     const getNextPossibleActions = (state: string): string[] => {
         switch (state.toLowerCase()) {
             case "read":
-                return ["Processing", "Done", "Discarded", "Failed"];
+                return ["Discarded", "Failed", "Processing", "Done"];
             case "processing":
                 return ["Done", "Failed"];
             default:
@@ -242,23 +276,68 @@ const ListMessages: React.FC = () => {
                             <p><strong>Subject:</strong> {selectedMessage.subject}</p>
                             <p><strong>From:</strong> {selectedMessage.sender}</p>
                             <p><strong>Channel:</strong> {selectedMessage.channel}</p>
-                            <p><strong>Priority:</strong> {selectedMessage.priority}</p>
+                            <div className="d-flex align-items-center mb-2">
+                                <strong className="me-2">Priority:</strong>
+                                <Form.Control
+                                    type="number"
+                                    min={1}
+                                    max={10}
+                                    value={editedPriority ?? ""}
+                                    onChange={(e) => setEditedPriority(Number(e.target.value))}
+                                    style={{ width: "100px", marginRight: "10px" }}
+                                />
+                                <Button
+                                    variant="dark"
+                                    disabled={editedPriority === selectedMessage.priority || savingPriority || editedPriority == null}
+                                    onClick={async () => {
+                                        if (!selectedMessage?.id || editedPriority == null) return;
+                                        setSavingPriority(true);
+                                        try {
+                                            await changeMessagePriority(selectedMessage.id, editedPriority);
+                                            setSelectedMessage(prev => prev ? { ...prev, priority: editedPriority } : null);
+                                            setMessages(prev => prev ? prev.map(m => m.id === selectedMessage.id ? { ...m, priority: editedPriority } : m) : []);
+                                            await ensureCSRFToken();
+                                        } catch (err) {
+                                            console.error(err);
+                                            setError("Error while updating priority.");
+                                        } finally {
+                                            setSavingPriority(false);
+                                        }
+                                    }}
+                                >
+                                    {savingPriority ? <Spinner as="span" animation="border" size="sm" /> : <><BsPencilSquare /> Edit</>}
+                                </Button>
+                            </div>
+
                             <p><strong>Status:</strong> {selectedMessage.currentState}</p>
                             <p><strong>Date, Time:</strong> {formatDate(selectedMessage.createdDate)}</p>
                             <p><strong>Body:</strong> {selectedMessage.body}</p>
 
+                            <hr />
+                            <div className="d-flex justify-content-between align-items-center">
+                                <div>
+                                    {getNextPossibleActions(selectedMessage.currentState).length > 0 ? (
+                                        <>
+                                        <strong>Possible Actions:</strong>
+                                            {getNextPossibleActions(selectedMessage.currentState).map(action => (
+                                                <Button
+                                                    key={action}
+                                                    variant={getButtonVariant(action)}
+                                                    className="m-1"
+                                                    onClick={() => openActionModal(action)}
+                                                >
+                                                    {action}
+                                                </Button>
+                                            ))}</>
+                                    ) : ""}
+                                </div>
+                                <div>
+                                    <Button variant="dark" onClick={openHistoryModal}>
+                                        <BsEye /> State History
+                                    </Button>
+                                </div>
+                            </div>
 
-                            {getNextPossibleActions(selectedMessage.currentState).length > 0 &&
-                                <>
-                                    {/* Action buttons */}
-                                    <hr />
-                                    <p><strong>Possible Actions:</strong></p>
-                                    {getNextPossibleActions(selectedMessage.currentState).map(action => (
-                                        <Button key={action} variant="primary" className="m-1" onClick={() => openActionModal(action)}>
-                                            {action}
-                                        </Button>
-                                    ))}
-                                </>}
                         </>
                     )}
                 </Modal.Body>
@@ -278,6 +357,38 @@ const ListMessages: React.FC = () => {
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowActionModal(false)}>Cancel</Button>
                     <Button variant="primary" onClick={handleChangeState}>Confirm</Button>
+                </Modal.Footer>
+            </Modal>
+            <Modal show={showHistoryModal} onHide={() => setShowHistoryModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>State History</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {historyData.length === 0 ? (
+                        <p>No history available.</p>
+                    ) : (
+                        <Table striped bordered hover>
+                            <thead>
+                            <tr>
+                                <th>State</th>
+                                <th>Comment</th>
+                                <th>Date</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {historyData.map((entry, idx) => (
+                                <tr key={idx}>
+                                    <td>{entry.state}</td>
+                                    <td>{entry.comment}</td>
+                                    <td>{formatDate(entry.date)}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </Table>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowHistoryModal(false)}>Close</Button>
                 </Modal.Footer>
             </Modal>
         </Container>

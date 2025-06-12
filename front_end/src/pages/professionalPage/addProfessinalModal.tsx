@@ -166,7 +166,7 @@ const AddProfessionalModal: React.FC<AddProfessionalModalProps> = ({ show, onHid
                             </Col>
                             <Col mb="3">
                                 <div className="btn-group">
-                                    <Button onClick={handleFilter} variant="outline-primary">
+                                    <Button onClick={handleFilter} className="btn-custom">
                                         {filtering ? <Spinner animation="border" size="sm" /> : "Apply"}
                                     </Button>
                                     <Button onClick={handleClearFilters} variant="outline-danger">

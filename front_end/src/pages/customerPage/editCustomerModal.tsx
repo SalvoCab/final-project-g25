@@ -55,7 +55,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({customer, show, on
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={onHide}>Cancel</Button>
-                <Button variant="primary" onClick={handleSubmit} disabled={loading}>
+                <Button className="btn-custom" onClick={handleSubmit} disabled={loading}>
                     {loading ? "Editing..." : "Edit"}
                 </Button>
             </Modal.Footer>

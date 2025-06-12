@@ -130,7 +130,7 @@ const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ show, onHide, onCus
                             </Col>
                             <Col mb="3">
                                 <div className="btn-group">
-                                    <Button onClick={handleFilter} variant="outline-primary">
+                                    <Button onClick={handleFilter} className="btn-custom-outline">
                                         {filtering ? <Spinner animation="border" size="sm" /> : "Apply"}
                                     </Button>
                                     <Button onClick={handleClearFilters} variant="outline-danger">

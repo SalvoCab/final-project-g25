@@ -75,7 +75,7 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
             .map(s => parseInt(s.trim()))
             .filter(n => !isNaN(n));
 
-        listProfessionals(page, limit, skillIds, appliedFilters.location, appliedFilters.state)
+        listProfessionals({page: page, limit: limit, skills: skillIds,location: appliedFilters.location,state: appliedFilters.state})
             .then((data) => {
                 ensureCSRFToken();
                 setProfessionals(data);
@@ -164,7 +164,7 @@ const ListProfessionals: React.FC<ListProfessionalsProps> = ({ me }) => {
             .split(",")
             .map(s => parseInt(s.trim()))
             .filter(n => !isNaN(n));
-        listProfessionals(page, limit, skillIds, appliedFilters.location, appliedFilters.state)
+        listProfessionals({page: page, limit: limit,skills: skillIds,location: appliedFilters.location,state: appliedFilters.state})
             .then((data) => {
                 setProfessionals(data);
                 setHasMore(data.length === limit);
