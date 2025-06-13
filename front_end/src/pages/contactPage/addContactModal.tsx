@@ -31,7 +31,7 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
     const [professionalData, setProfessionalData] = useState<CreateProfessionalDTO>({
         location: "",
         state: "employed",
-        dailyRate: 0.0,
+        dailyRate: 1,
         skills: [],
     });
 
@@ -54,7 +54,7 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
         setProfessionalData({
             location: "",
             state: "employed",
-            dailyRate: 0.0,
+            dailyRate: 1.0,
             skills: [],
         });
         setCategory("unknown");

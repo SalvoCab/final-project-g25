@@ -1,6 +1,5 @@
 services:
   keycloak:
-    #build: ./keycloak_spi
     image: keycloak/keycloak
     ports:
       - '9095:8080'
@@ -51,96 +50,6 @@ services:
       DYNAMIC_CONFIG_ENABLED: 'true'
     networks:
       - kfk-net
-#  api_gateway_app:
-#    build: ./api_gateway
-#    image: 'api_gateway:latest'
-#    ports:
-#      - '8080:8080'
-##    networks:
-##      - keycloak
-##      - kfk-net
-#    depends_on:
-#      keycloak:
-#        condition: service_healthy
-#      kafka:
-#        condition: service_healthy
-#    network_mode: host
-#    healthcheck:
-#      test: wget --spider -q http://localhost:8080/ || exit 1
-#      start_period: 5s
-#      interval: 5s
-#      timeout: 1s
-#      retries: 10
-
-#  cm_app:
-#    build: ./communication_manager
-#    image: 'communication_manager:latest'
-#    networks:
-#      - keycloak
-#      - kfk-net
-#      - postgres
-#    ports:
-#      - '8082:8082'
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
-#    healthcheck:
-#      test: wget --spider -q http://localhost:8082/actuator/health || exit
-#      start_period: 20s
-#      interval: 5s
-#      timeout: 1s
-#      retries: 10
-#
-#  crm_app:
-#    build: ./customer_relationship_management
-#    image: 'customer_relationship_management:latest'
-#    ports:
-#      - '8050:8050'
-#    depends_on:
-#      kafka:
-#        condition: service_healthy
-#      postgres:
-#        condition: service_healthy
-#    networks:
-#      - kfk-net
-#      - postgres
-#      - keycloak
-#    healthcheck:
-#      test: wget --spider -q http://localhost:8050/actuator/health || exit 1
-#      start_period: 5s
-#      interval: 5s
-#      timeout: 1s
-#      retries: 10
-#
-#  ds_app:
-#    build: ./document_store
-#    image: 'document_store:latest'
-#    ports:
-#      - '8052:8052'
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
-#    networks:
-#      - kfk-net
-#      - postgres
-#    healthcheck:
-#      test: wget --spider -q http://localhost:8052/actuator/health || exit
-#      start_period: 20s
-#      interval: 5s
-#      timeout: 1s
-#      retries: 10
-#
-#  front_end_app:
-#    build: ./front_end
-#    image: 'front_end:latest'
-#    ports:
-#      - '5173:5173'
-#    healthcheck:
-#      test: curl -f http://localhost:5173 || exit 1
-#      start_period: 1s
-#      interval: 5s
-#      timeout: 1s
-#      retries: 10
 
   postgres:
     image: 'postgres:latest'
@@ -155,43 +64,74 @@ services:
     networks:
       - postgres
 
-#  analytics:
-#    build: ./analytics
-#    image: analytics:latest
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
-#      kafka:
-#        condition: service_healthy
-#    networks:
-#      - kfk-net
-#      - keycloak
-#      - postgres
-#    ports:
-#      - "8084:8084"
-#    healthcheck:
-#      test: bash -c ':> /dev/tcp/localhost/8084'
-#      start_period: 15s
-#      interval: 5s
-#      timeout: 1s
-#      retries: 10
 
-#  analytics_db:
-#    image: 'postgres:latest'
-#    environment:
-#      - 'POSTGRES_DB=mydatabase'
-#      - 'POSTGRES_PASSWORD=secret'
-#      - 'POSTGRES_USER=myuser'
-#    volumes:
-#      - analytics_data:/var/lib/postgresql/data
-#    networks:
-#      - analytics-net
-#    healthcheck:
-#      test: ["CMD-SHELL", "pg_isready", "-d", "mydatabase"]
-#      start_period: 1s
-#      interval: 5s
-#      timeout: 5s
-#      retries: 10
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ${PROMETHEUS_CONTAINER_NAME}
+    restart: always
+    env_file: .env
+    volumes:
+      - ./monitoring/configs/prometheus.yaml/:/etc/prometheus/prometheus.yml
+    ports:
+      - ${PROMETHEUS_PORT}:${DEFAULT_PROMETHEUS_PORT}
+    networks:
+      - monitoring
+
+
+
+  loki:
+    pull_policy: always
+    image: grafana/loki
+    container_name: ${LOKI_CONTAINER_NAME}
+    env_file: .env
+    volumes:
+      - ./monitoring/configs/local-config.yaml:/etc/loki/local-config.yaml
+    ports:
+      - ${LOKI_PORT}:${LOKI_PORT}
+    command:
+      - -config.expand-env=true
+      - -config.file=/etc/loki/local-config.yaml
+    networks:
+      - monitoring
+
+
+  grafana:
+    pull_policy: always
+    image: grafana/grafana
+    container_name: ${GRAFANA_CONTAINER_NAME}
+    restart: always
+    env_file: .env
+    volumes:
+      - ./monitoring/configs/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./monitoring/configs/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
+      - ./monitoring/dashboards/loki_dashboard.json:/var/lib/grafana/dashboards/loki_dashboard.json
+      - ./monitoring/dashboards/prometheus_dashboard.json:/var/lib/grafana/dashboards/prometheus_dashboard.json
+    ports:
+      - ${GRAFANA_PORT}:${GRAFANA_PORT}
+    depends_on:
+      - loki
+      - prometheus
+    networks:
+      - monitoring
+
+
+  promtail:
+    pull_policy: always
+    image: grafana/promtail
+    container_name: ${PROMTAIL_CONTAINER_NAME}
+    env_file: .env
+    volumes:
+      - ./customer_relationship_management/src/log/crm_logfile.log:/var/log/crm_logfile.log
+      - ./monitoring/configs/promtail.yaml:/etc/promtail/promtail.yaml
+    ports:
+      - ${PROMTAIL_PORT}:${PROMTAIL_PORT}
+    depends_on:
+      - loki
+    command:
+      - -config.expand-env=true
+      - -config.file=/etc/promtail/config.yml
+    networks:
+      - monitoring
 
 networks:
   kfk-net:
@@ -200,7 +140,11 @@ networks:
     driver: bridge
   postgres:
     driver: bridge
+  monitoring:
+    driver: bridge
 
 volumes:
   postgres_data:
   kafka_data:
+  prometheus_data:
+  grafana_data:

@@ -6,6 +6,7 @@ import com.example.customer_relationship_management.controllers.ProfessionalNotF
 import com.example.customer_relationship_management.dtos.ProfessionalDTO
 import com.example.customer_relationship_management.dtos.ProfessionalKafkaDTO
 import com.example.customer_relationship_management.dtos.toDto
+import com.example.customer_relationship_management.dtos.toProfessionalKafkaDTO
 import com.example.customer_relationship_management.entities.*
 import com.example.customer_relationship_management.repositories.ProfessionalRepository
 import jakarta.persistence.EntityManager
@@ -66,8 +67,9 @@ class ProfessionalServiceImpl (private val professionalRepository: ProfessionalR
 
             professional.addSkill(skill)
         }
-
-        return professionalRepository.save(professional)
+        val p =professionalRepository.save(professional)
+        kafkaTemplate.send("PROFESSIONAL",p.toProfessionalKafkaDTO())
+        return p
     }
 
     override fun updateProfessional(location: String, state: String, dailyRate: Double, professional: Professional): Professional {

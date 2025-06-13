@@ -5,6 +5,7 @@ import com.example.customer_relationship_management.controllers.CustomerNotFound
 import com.example.customer_relationship_management.controllers.InvalidDeletionException
 import com.example.customer_relationship_management.dtos.CustomerDTO
 import com.example.customer_relationship_management.dtos.CustomerKafkaDTO
+import com.example.customer_relationship_management.dtos.toCustomerKafkaDTO
 import com.example.customer_relationship_management.dtos.toDto
 import com.example.customer_relationship_management.entities.*
 import com.example.customer_relationship_management.repositories.CustomerRepository
@@ -53,7 +54,9 @@ class CustomerServiceImpl (private val customerRepository: CustomerRepository, p
             throw AssociationAlreadyExistException("You cannot create a costumer to a contact that has category ${contact.category}")
         contact.category="customer"
         val customer = Customer(notes, contact)
-        return customerRepository.save(customer)
+        val c=customerRepository.save(customer)
+        kafkaTemplate.send("CUSTOMER",c.toCustomerKafkaDTO())
+        return c
     }
 
     override fun updateCustomer(notes: String?, customer: Customer): Customer {

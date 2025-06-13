@@ -32,4 +32,19 @@ keycloak:
 server:
   port: 8050
 
+logging:
+  level:
+    root: INFO
+    org.springframework: DEBUG
+  file:
+    name: './src/log/crm_logfile.log'
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true

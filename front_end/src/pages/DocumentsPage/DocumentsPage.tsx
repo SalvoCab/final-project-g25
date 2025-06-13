@@ -49,7 +49,7 @@ const ListDocuments: React.FC<ListDocumentsProps> = ({ me }) => {
                 ensureCSRFToken();
             })
             .catch(() => {
-                setError("Errore durante il caricamento dei documenti.");
+                setError("Error during the loading of the documents.");
             })
             .finally(() => setLoading(false));
     }, [page, limit]);
@@ -74,7 +74,7 @@ const ListDocuments: React.FC<ListDocumentsProps> = ({ me }) => {
             } else {
                 console.error("Unexpected error:", error);
             }
-            setError("Errore durante l'upload del documento.");
+            setError("Error during the upload of the document.");
         } finally {
             setUploading(false);
         }
@@ -92,17 +92,17 @@ const ListDocuments: React.FC<ListDocumentsProps> = ({ me }) => {
             a.remove();
             window.URL.revokeObjectURL(url);
         } catch {
-            alert("Errore durante il download.");
+            alert("Error during the download of the document.");
         }
     };
 
     const handleDelete = async (id: number) => {
-        if (!window.confirm("Sei sicuro di voler eliminare questo documento?")) return;
+        if (!window.confirm("do you want to delete this document?")) return;
         try {
             await deleteDocument(id);
             setDocuments((prev) => prev.filter(doc => doc.id !== id));
         } catch {
-            alert("Errore durante l'eliminazione.");
+            alert("Error during the deletion of the document.");
         }
     };
 
@@ -112,7 +112,7 @@ const ListDocuments: React.FC<ListDocumentsProps> = ({ me }) => {
             const url = URL.createObjectURL(blob);
             setPreviewDoc({ url, type: contentType });
         } catch {
-            alert("Errore durante il caricamento dell'anteprima.");
+            alert("Error during the preview of the document.");
         }
     };
 
@@ -140,7 +140,7 @@ const ListDocuments: React.FC<ListDocumentsProps> = ({ me }) => {
             setEditedName("");
             await ensureCSRFToken();
         } catch {
-            alert("Errore durante il salvataggio del nome.");
+            alert("Error during the update of the document name.");
         }
     };
 
@@ -180,7 +180,7 @@ const ListDocuments: React.FC<ListDocumentsProps> = ({ me }) => {
                             style={{ display: "none" }}
                         />
                         <Button
-                            variant="primary"
+                            className="btn-custom"
                             onClick={() => document.getElementById("hiddenFileInput")?.click()}
                             disabled={uploading}
                         >

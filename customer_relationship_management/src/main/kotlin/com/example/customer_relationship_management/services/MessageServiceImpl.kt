@@ -134,7 +134,6 @@ class MessageServiceImpl(private val messageRepository: MessageRepository,privat
             else -> throw InvalidStateException("Invalid state with value: $state")
         }
         val mess =messageRepository.save(message)
-        kafkaTemplate.send("MESSAGE",mess.toMessageKafkaDTO() )
         return mess
     }
 
