@@ -4,15 +4,17 @@ import com.example.customer_relationship_management.controllers.AssociationAlrea
 import com.example.customer_relationship_management.controllers.CustomerNotFoundException
 import com.example.customer_relationship_management.controllers.InvalidDeletionException
 import com.example.customer_relationship_management.dtos.CustomerDTO
+import com.example.customer_relationship_management.dtos.CustomerKafkaDTO
 import com.example.customer_relationship_management.dtos.toDto
 import com.example.customer_relationship_management.entities.*
 import com.example.customer_relationship_management.repositories.CustomerRepository
 import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.*
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 
 @Service
-class CustomerServiceImpl (private val customerRepository: CustomerRepository, private val entityManager: EntityManager) : CustomerService{
+class CustomerServiceImpl (private val customerRepository: CustomerRepository, private val entityManager: EntityManager, private val kafkaTemplate: KafkaTemplate<String, CustomerKafkaDTO>) : CustomerService{
     override fun listPaginated(offset: Int, limit: Int, keyword: String): List<CustomerDTO> {
         val criteriaBuilder = entityManager.criteriaBuilder
         val criteriaQuery = criteriaBuilder.createQuery(Customer::class.java)

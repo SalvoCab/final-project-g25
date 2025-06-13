@@ -4,15 +4,17 @@ import com.example.customer_relationship_management.controllers.AssociationAlrea
 import com.example.customer_relationship_management.controllers.InvalidDeletionException
 import com.example.customer_relationship_management.controllers.ProfessionalNotFoundException
 import com.example.customer_relationship_management.dtos.ProfessionalDTO
+import com.example.customer_relationship_management.dtos.ProfessionalKafkaDTO
 import com.example.customer_relationship_management.dtos.toDto
 import com.example.customer_relationship_management.entities.*
 import com.example.customer_relationship_management.repositories.ProfessionalRepository
 import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.*
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 
 @Service
-class ProfessionalServiceImpl (private val professionalRepository: ProfessionalRepository, private val entityManager: EntityManager) : ProfessionalService {
+class ProfessionalServiceImpl (private val professionalRepository: ProfessionalRepository, private val entityManager: EntityManager, private val kafkaTemplate: KafkaTemplate<String, ProfessionalKafkaDTO>) : ProfessionalService {
     override fun listPaginated(offset: Int, limit: Int,skills: List<Long>?, location: String, state: String, keyword:String): List<ProfessionalDTO> {
         val criteriaBuilder: CriteriaBuilder = entityManager.criteriaBuilder
         val criteriaQuery: CriteriaQuery<Professional> = criteriaBuilder.createQuery(Professional::class.java)
