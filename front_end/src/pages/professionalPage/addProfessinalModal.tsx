@@ -19,7 +19,7 @@ const AddProfessionalModal: React.FC<AddProfessionalModalProps> = ({ show, onHid
     const [professionalData, setProfessionalData] = useState<CreateProfessionalDTO>({
         location: "",
         state: "employed",
-        dailyRate: 0.0,
+        dailyRate: 1.0,
         skills: [],
     });
     const [loading, setLoading] = useState(false);
@@ -124,7 +124,7 @@ const AddProfessionalModal: React.FC<AddProfessionalModalProps> = ({ show, onHid
             setProfessionalData({
                 location: "",
                 state: "employed",
-                dailyRate: 0.0,
+                dailyRate: 1.0,
                 skills: [],
             });
             setNewSkillName("")
@@ -220,7 +220,7 @@ const AddProfessionalModal: React.FC<AddProfessionalModalProps> = ({ show, onHid
                         <Col md={2}>
                             <Form.Group className="mb-3">
                                 <Form.Label>Daily Rate</Form.Label>
-                                <Form.Control type="number" step="0.1" value={professionalData?.dailyRate} onChange={(e) => setProfessionalData((prev) => ({ ...prev, dailyRate: parseFloat(e.target.value) }))} />
+                                <Form.Control type="number" step="0.1" value={professionalData?.dailyRate} min={1} onChange={(e) => setProfessionalData((prev) => ({ ...prev, dailyRate: parseFloat(e.target.value) }))} />
                             </Form.Group>
                         </Col>
                     </Row>

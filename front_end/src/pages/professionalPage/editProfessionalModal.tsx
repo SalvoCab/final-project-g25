@@ -19,7 +19,7 @@ const EditProfessionalModal: React.FC<EditProfessionalModalProps> = ({profession
     const [formData, setFormData] = useState<CreateProfessionalDTO>({
         location: "",
         state: "employed",
-        dailyRate: 0,
+        dailyRate: 1.0,
         skills: []
     });
     const [availableSkills, setAvailableSkills] = useState<SkillDTO[]>([]);
@@ -109,6 +109,7 @@ const EditProfessionalModal: React.FC<EditProfessionalModalProps> = ({profession
                                 <Form.Control
                                     type="number"
                                     step="0.1"
+                                    min={1}
                                     value={formData.dailyRate}
                                     onChange={(e) => setFormData(prev => ({ ...prev, dailyRate: parseFloat(e.target.value) }))}
                                 />

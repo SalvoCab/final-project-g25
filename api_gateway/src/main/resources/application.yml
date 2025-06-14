@@ -38,6 +38,13 @@ spring:
             filters:
               - StripPrefix=1
               - TokenRelay
+          - id: an
+            uri: http://localhost:8084
+            predicates:
+              - Path=/an/**
+            filters:
+              - StripPrefix=1
+              - TokenRelay
           - id: ds
             uri: http://localhost:8052
             predicates:

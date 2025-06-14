@@ -171,7 +171,7 @@ const AddContactModal: React.FC<AddContactModalProps> = ({ show, onHide, onConta
                                 <Col md={2}>
                                     <Form.Group className="mb-3">
                                         <Form.Label>Daily Rate</Form.Label>
-                                        <Form.Control type="number" step="0.1" value={professionalData.dailyRate} onChange={(e) => setProfessionalData((prev) => ({ ...prev, dailyRate: parseFloat(e.target.value) }))} />
+                                        <Form.Control type="number" min={1} step="0.1" value={professionalData.dailyRate} onChange={(e) => setProfessionalData((prev) => ({ ...prev, dailyRate: parseFloat(e.target.value) }))} />
                                     </Form.Group>
                                 </Col>
                             </Row>

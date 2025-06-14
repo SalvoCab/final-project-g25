@@ -12,6 +12,7 @@ import ListMessages from "./pages/MessagesPage/MessagesPage.tsx";
 import ListDocuments from "./pages/DocumentsPage/DocumentsPage.tsx";
 import ListProfessionals from "./pages/professionalPage/professionalPage.tsx";
 import ListCustomers from "./pages/customerPage/customerPage.tsx";
+import AnalyticsDashboard from "./pages/analyticsPage/analyticsPage.tsx";
 
 export interface MeInterface {
     name: string;
@@ -144,6 +145,7 @@ function App() {
                                     <Route path="/customers" element={<ListCustomers me={me} />}/>
                                     <Route path="/messages" element={<ListMessages/>}/>
                                     <Route path="/documents" element={<ListDocuments me={me}/>}/>
+                                    <Route path="/ui" element={<AnalyticsDashboard />}/>
                                 </Routes>
                             </Col>
                         </Row>

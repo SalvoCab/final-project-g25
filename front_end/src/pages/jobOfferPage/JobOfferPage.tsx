@@ -59,7 +59,7 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
   useEffect(() => {
     setLoading(true);
 
-    if (localJobOffer.state === "Created" && localJobOffer.skills.length > 0) {
+    if (localJobOffer.state === "Created") {
       listProfessionals({page:0,limit:20, skills:localJobOffer.skills.map(it => it.id),location:"",state:"available_for_work",keyword:""})
           .then(setProfessionals)
           .finally(() => setLoading(false));

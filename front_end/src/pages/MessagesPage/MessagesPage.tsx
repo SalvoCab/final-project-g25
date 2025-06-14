@@ -64,6 +64,7 @@ const ListMessages: React.FC = () => {
                 await changeMessageState(msg.id, { state: "Read", comment: "Message read" }).then((mess) => {
                     setMessages(prev => prev.map(m => m.id === mess.id_message ? { ...m, currentState: mess.state } : m));
                     setSelectedMessage({ ...msg, currentState: mess.state });
+                    setEditedPriority(msg.priority);
                 });
                 await ensureCSRFToken();
             } catch (error) {

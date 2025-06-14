@@ -32,7 +32,7 @@ const EditContactModal: React.FC<EditContactModalProps> = ({contact, show, onHid
     const [professionalData, setProfessionalData] = useState<CreateProfessionalDTO>({
         location: "",
         state: "employed",
-        dailyRate: 0.0,
+        dailyRate: 1.0,
         skills: [],
     });
 
@@ -199,7 +199,7 @@ const EditContactModal: React.FC<EditContactModalProps> = ({contact, show, onHid
                                 <Col md={2}>
                                     <Form.Group className="mb-3">
                                         <Form.Label>Daily Rate</Form.Label>
-                                        <Form.Control type="number" step="0.1" value={professionalData.dailyRate} onChange={(e) => setProfessionalData((prev) => ({ ...prev, dailyRate: parseFloat(e.target.value) }))} />
+                                        <Form.Control type="number" step="0.1" value={professionalData.dailyRate} min={1} onChange={(e) => setProfessionalData((prev) => ({ ...prev, dailyRate: parseFloat(e.target.value) }))} />
                                     </Form.Group>
                                 </Col>
                             </Row>
