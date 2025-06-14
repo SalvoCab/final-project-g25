@@ -27,7 +27,7 @@ class JobOfferAnalyticsService(
                     offer.value,
                     offer.customer,
                     offer.professional,
-                    offer.skills))
+                    offer.skills.toMutableList()))
 
         }else{
             val offer_monitored = offerRetrieved.get()
@@ -35,7 +35,8 @@ class JobOfferAnalyticsService(
             offer_monitored.notes=offer.notes!!
             offer_monitored.value=offer.value
             offer_monitored.description=offer.description
-            offer_monitored.skills=offer.skills
+            offer_monitored.skills.clear()
+            offer_monitored.skills.addAll(offer.skills)
             offer_monitored.duration=offer.duration
             jobOfferAnalyticsRepository.save(offer_monitored)
         }

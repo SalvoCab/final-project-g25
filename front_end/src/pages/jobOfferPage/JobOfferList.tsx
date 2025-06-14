@@ -225,44 +225,51 @@ export default function ListJobOffers() {
 
 
 
-    const renderJobOfferCard = (job: JobOffer) => (
-        <Card
-            key={job.id}
-            className="mb-3 job-offer-card"
-            style={{ backgroundColor: '#F6F5EC', border: '1px solid #14382C' }}
-            onClick={() => handleCardClick(job)}
-        >
-            <Card.Body>
-                <div className="d-flex justify-content-between align-items-start mb-3">
-                    <h3 className="h5 mb-0">{job.description}</h3>
-                    <span style={getCategoryStyle(job.state)}>
-                      {job.state.toLowerCase().includes("aborted") ? "Aborted" : job.state}
+    const renderJobOfferCard = (job: JobOffer) => {
+        const customer = filterCustomers.find(it => it.id === job.customer);
+
+        return (
+            <Card
+                key={job.id}
+                className="mb-3 job-offer-card"
+                style={{ backgroundColor: '#F6F5EC', border: '1px solid #14382C' }}
+                onClick={() => handleCardClick(job)}
+            >
+                <Card.Body>
+                    <div className="d-flex justify-content-between align-items-start mb-3">
+                        <h3 className="h5 mb-0">
+                            {job.description} - {customer ? `${customer.name} ${customer.surname}` : "Unknown Customer"}
+                        </h3>
+                        <span style={getCategoryStyle(job.state)}>
+                        {job.state.toLowerCase().includes("aborted") ? "Aborted" : job.state}
                     </span>
-                </div>
-                <Row className="mt-3">
-                    <Col md={6}>
-                        <div className="d-flex align-items-center mb-2">
-                            <BsClock className="me-2" /><span><b>Duration:</b> {job.duration} days</span>
-                        </div>
-                        <div className="d-flex align-items-center mb-2">
-                            <BsCash className="me-2" />
-                            <span><b>Value:</b> €{job.value?.toFixed(2)}</span>
-                        </div>
-                    </Col>
-                    <Col md={6}>
-                        <div className="d-flex align-items-center mb-2">
-                            <BsListCheck className="me-2" />
-                            <span><b> Skills: </b>{job.skills.map(it => it.skill).join(", ") || "None"}</span>
-                        </div>
-                        <div className="d-flex align-items-center">
-                            <BsFileText className="me-2" />
-                            <span><b> Notes: </b>{job.notes || "No Notes"}</span>
-                        </div>
-                    </Col>
-                </Row>
-            </Card.Body>
-        </Card>
-    );
+                    </div>
+                    <Row className="mt-3">
+                        <Col md={6}>
+                            <div className="d-flex align-items-center mb-2">
+                                <BsClock className="me-2" /><span><b>Duration:</b> {job.duration} days</span>
+                            </div>
+                            <div className="d-flex align-items-center mb-2">
+                                <BsCash className="me-2" />
+                                <span><b>Value:</b> €{job.value?.toFixed(2)}</span>
+                            </div>
+                        </Col>
+                        <Col md={6}>
+                            <div className="d-flex align-items-center mb-2">
+                                <BsListCheck className="me-2" />
+                                <span><b> Skills: </b>{job.skills.map(it => it.skill).join(", ") || "None"}</span>
+                            </div>
+                            <div className="d-flex align-items-center">
+                                <BsFileText className="me-2" />
+                                <span><b> Notes: </b>{job.notes || "No Notes"}</span>
+                            </div>
+                        </Col>
+                    </Row>
+                </Card.Body>
+            </Card>
+        );
+    };
+
     if (selectedJobOffer) {
         return (
             <Container className="py-4">

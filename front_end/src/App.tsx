@@ -82,7 +82,7 @@ function HomeUnautheticated() {
                 </Col>
                 <Col md={4}>
                     <div className="process-step text-center p-4">
-                        <p className="lead mb-0">Our manager takes care of the rest.</p>
+                        <p className="lead mb-0">Our team takes care of the rest.</p>
                     </div>
                 </Col>
             </Row>

@@ -17,22 +17,22 @@ type ChartData = {
 };
 
 const JOB_OFFERS_COLORS: Record<string, string> = {
-    "Created": "#0088FE",
-    "Selection Phase": "#00C49F",
-    "Candidate Proposal": "#FFBB28",
-    "Consolidated": "#FF8042",
-    "Done": "#AF19FF",
-    "Aborted": "#FF3333"
+    "Created": "#257180",
+    "Selection Phase": "#866d23",
+    "Candidate Proposal": "#61666b",
+    "Consolidated": "#5d4c8d",
+    "Done": "#2f7152",
+    "Aborted": "#a44049"
 };
 
 const PROFESSIONALS_COLORS: Record<string, string> = {
-    "Unemployed": "#FF6384",
-    "Available for Work": "#36A2EB",
-    "Not Available": "#FFCE56"
+    "Employed": "#254c85",
+    "Available for Work": "#2f7152",
+    "Not Available": "#a44049"
 };
 
 const jobOfferStates = ["Created", "Selection Phase", "Candidate Proposal", "Consolidated", "Done", "Aborted"];
-const professionalStates = ["Unemployed", "Available for Work", "Not Available"];
+const professionalStates = ["Employed", "Available for Work", "Not Available"];
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const AnalyticsDashboard: React.FC = () => {
@@ -97,7 +97,7 @@ const AnalyticsDashboard: React.FC = () => {
 
     function mapProfessionalsStatus(data: ChartData[]): ChartData[] {
         const mapping: Record<string, string> = {
-            "unemployed": "Unemployed",
+            "employed": "Employed",
             "available_for_work": "Available for Work",
             "not_available": "Not Available"
         };

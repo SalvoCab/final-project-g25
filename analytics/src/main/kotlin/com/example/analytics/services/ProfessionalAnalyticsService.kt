@@ -26,19 +26,19 @@ class ProfessionalAnalyticsService(
                     professional.location,
                     professional.state,
                     professional.dailyRate,
-                    professional.skills,
-
+                    professional.skills.toMutableList()
                 )
             )
-
-        }else{
+        } else {
             val professional_monitored = professionalRetrieved.get()
-            professional_monitored.name=professional.name
-            professional_monitored.surname=professional.surname
-            professional_monitored.location=professional.location
-            professional_monitored.state=professional.state
-            professional_monitored.dailyRate=professional.dailyRate
-            professional_monitored.skills=professional.skills
+            professional_monitored.name = professional.name
+            professional_monitored.surname = professional.surname
+            professional_monitored.location = professional.location
+            professional_monitored.state = professional.state
+            professional_monitored.dailyRate = professional.dailyRate
+            professional_monitored.skills.clear()
+            professional_monitored.skills.addAll(professional.skills)
+
             professionalAnalyticsRepository.save(professional_monitored)
         }
 

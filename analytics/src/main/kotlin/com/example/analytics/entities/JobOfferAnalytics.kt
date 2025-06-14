@@ -15,7 +15,7 @@ data class JobOfferAnalytics (
     var customer: String? = null,
     var professional: String? =null,
     @ElementCollection(fetch = FetchType.EAGER)
-    var skills: List<String> = listOf(),
+    var skills: MutableList<String> = mutableListOf(),
 ){
 
 }

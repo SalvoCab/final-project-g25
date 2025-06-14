@@ -15,7 +15,7 @@ class ProfessionalAnalytics(
     var state: String = "",
     var dailyRate: Double = 0.0,
     @ElementCollection(fetch = FetchType.EAGER)
-    var skills: List<String> = listOf(),
+    var skills: MutableList<String> = mutableListOf()
 )
 {
 
