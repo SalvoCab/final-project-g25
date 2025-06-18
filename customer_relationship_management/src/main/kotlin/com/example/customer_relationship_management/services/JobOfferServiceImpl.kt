@@ -6,8 +6,10 @@ import com.example.customer_relationship_management.controllers.InvalidStateExce
 import com.example.customer_relationship_management.dtos.JobOfferCandidateDTO
 import com.example.customer_relationship_management.dtos.JobOfferDTO
 import com.example.customer_relationship_management.dtos.JobOfferKafkaDTO
+import com.example.customer_relationship_management.dtos.ProfessionalKafkaDTO
 import com.example.customer_relationship_management.dtos.toDto
 import com.example.customer_relationship_management.dtos.toJobOfferKafkaDTO
+import com.example.customer_relationship_management.dtos.toProfessionalKafkaDTO
 import com.example.customer_relationship_management.entities.Customer
 import com.example.customer_relationship_management.entities.JobOffer
 import com.example.customer_relationship_management.entities.JobOfferCandidate
@@ -29,7 +31,9 @@ class JobOfferServiceImpl (
     private val jobOfferRepository: JobOfferRepository,
     private val entityManager: EntityManager,
     private val jobOfferCandidateRepository: JobOfferCandidateRepository,
-    private val kafkaTemplate: KafkaTemplate<String, JobOfferKafkaDTO>
+    private val professionalService: ProfessionalService,
+    private val kafkaTemplate: KafkaTemplate<String, JobOfferKafkaDTO>,
+    private val kafkaTemplateProf: KafkaTemplate<String, ProfessionalKafkaDTO>
 ) : JobOfferService {
     override fun createJobOffer(
         description: String,
@@ -190,9 +194,9 @@ class JobOfferServiceImpl (
                 jobOffer.goToConsolidated(notes?:"")
                 if (professional != null) {
                     if(professional.state.lowercase()=="available_for_work"){
-                        professional.state="employed"
                         professional.addJob(jobOffer)
                         jobOffer.value=professional.dailyRate*jobOffer.duration*1.1
+                        professionalService.updateProfessional(professional.location,"employed",professional.dailyRate,professional)
                     }else{
                         throw InvalidStateException("This professional is already cannot be employed")
                     }
@@ -207,6 +211,7 @@ class JobOfferServiceImpl (
                 jobOffer.goToDone(notes?:"")
                 if(jobOffer.professional!=null){
                     jobOffer.professional!!.state="available_for_work"
+                    kafkaTemplateProf.send("PROFESSIONAL-UPDATE",jobOffer.professional!!.toProfessionalKafkaDTO())
                 }
 
             }else{

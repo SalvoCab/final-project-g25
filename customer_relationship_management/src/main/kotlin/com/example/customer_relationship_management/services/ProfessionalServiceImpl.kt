@@ -68,7 +68,7 @@ class ProfessionalServiceImpl (private val professionalRepository: ProfessionalR
             professional.addSkill(skill)
         }
         val p =professionalRepository.save(professional)
-        kafkaTemplate.send("PROFESSIONAL",p.toProfessionalKafkaDTO())
+        kafkaTemplate.send("PROFESSIONAL-CREATE",p.toProfessionalKafkaDTO())
         return p
     }
 
@@ -76,7 +76,9 @@ class ProfessionalServiceImpl (private val professionalRepository: ProfessionalR
         professional.location = location
         professional.state = state
         professional.dailyRate = dailyRate
-        return professionalRepository.save(professional)
+        val p = professionalRepository.save(professional)
+        kafkaTemplate.send("PROFESSIONAL-UPDATE",p.toProfessionalKafkaDTO())
+        return p
     }
 
     override fun findById(id: Long): Professional {

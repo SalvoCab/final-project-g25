@@ -12,10 +12,10 @@ import org.springframework.stereotype.Service
 class ProfessionalAnalyticsService(
     private val professionalAnalyticsRepository: ProfessionalAnalyticsRepository,
 ) {
-
-    @KafkaListener(topics = ["PROFESSIONAL"], groupId = "consumer-monitoring-group",containerFactory = "kafkaProfessionalListenerContainerFactory")
+    @KafkaListener(topics = ["PROFESSIONAL-CREATE"], groupId = "consumer-monitoring-group",containerFactory = "kafkaProfessionalListenerContainerFactory")
+    @KafkaListener(topics = ["PROFESSIONAL-UPDATE"], groupId = "consumer-monitoring-group",containerFactory = "kafkaProfessionalListenerContainerFactory")
     fun createdProfessionalListener( professional: ProfessionalAnalyticsDTO) {
-        print("received PROFESSIONAL")
+        print("received PROFESSIONAL-CREATE/UPDATE")
         val professionalRetrieved = professionalAnalyticsRepository.findById(professional.id!!)
         if (!professionalRetrieved.isPresent) {
             professionalAnalyticsRepository.save(
