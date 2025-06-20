@@ -4,9 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
-import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AbstractAuthenticationToken
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -17,8 +15,6 @@ import org.springframework.security.oauth2.jwt.JwtClaimNames
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
 import java.util.stream.Collectors
@@ -26,27 +22,23 @@ import java.util.stream.Stream
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 class SecurityConfig(private val jwtAuthConverter: JwtAuthConverter) {
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        return http.authorizeHttpRequests {
-            it.requestMatchers(HttpMethod.POST, "/api/emails/**").hasAnyAuthority("ROLE_manager","ROLE_operator")
-                    .anyRequest().permitAll()
-        }
-                .oauth2ResourceServer {
-                    it.jwt {jwtConfigurer ->
-                        jwtConfigurer.jwtAuthenticationConverter(jwtAuthConverter)
-                    }
+        return http
+            .authorizeHttpRequests { it.anyRequest().permitAll() }
+            .oauth2ResourceServer {
+                it.jwt { jwtConfigurer ->
+                    jwtConfigurer.jwtAuthenticationConverter(jwtAuthConverter)
                 }
-                .sessionManagement { it.sessionCreationPolicy( SessionCreationPolicy.STATELESS) }
-                .csrf { it.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                    it.csrfTokenRequestHandler(SpaCsrfTokenRequestHandler()) }
-                .cors { it.disable() }
-                .addFilterAfter(CsrfCookieFilter(), BasicAuthenticationFilter::class.java)
-                .build()
+            }
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .csrf { it.disable() }
+            .cors { it.disable() }
+            .build()
     }
 }
+
 
 
 @Validated

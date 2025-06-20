@@ -140,7 +140,7 @@ class MessageServiceImpl(private val messageRepository: MessageRepository,privat
     override fun notify(oldState: String, newState: String, email: SendEmailDTO): String? {
         val restTemplate = RestTemplate()
 
-        val resourceUrl = "http://localhost:8051/api"
+        val resourceUrl = "http://localhost:8082/api"
 
         // Create headers and set content type to application/json
         val headers = HttpHeaders().apply {
