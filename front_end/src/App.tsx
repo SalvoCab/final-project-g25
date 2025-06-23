@@ -139,7 +139,7 @@ function App() {
                                 <Routes>
                                     <Route path="/" element={<h2>Welcome to the Management System</h2>} />
                                     <Route path="/profile" element={<ProfilePage me={me} />} />
-                                    <Route path="/job-offers-list" element={<ListJobOffers />} />
+                                    <Route path="/job-offers-list" element={<ListJobOffers me={me}/>} />
                                     <Route path="/contacts" element={<ListContacts me={me} />} />
                                     <Route path="/professionals" element={<ListProfessionals me={me} />}/>
                                     <Route path="/customers" element={<ListCustomers me={me} />}/>

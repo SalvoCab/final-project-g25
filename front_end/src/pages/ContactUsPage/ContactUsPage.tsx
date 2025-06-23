@@ -40,7 +40,7 @@ const ContactUsPage: React.FC = () => {
                     If you are a professional, please include in the message:
                 </p>
                 <ul>
-                    <li>Your hourly rate</li>
+                    <li>Your daily rate</li>
                     <li>Your key skills</li>
                     <li>Contact information for getting back to you (phone/email/address)</li>
                 </ul>
@@ -57,13 +57,13 @@ const ContactUsPage: React.FC = () => {
 
             <Form onSubmit={handleSubmit}>
                 <Form.Group className="mb-3">
-                    <Form.Label>Name/Company</Form.Label>
+                    <Form.Label>Email</Form.Label>
                     <Form.Control
                         type="text"
                         value={formData.sender}
                         onChange={(e) => setFormData({ ...formData, sender: e.target.value })}
                         required
-                        placeholder="Enter your name or the company's name"
+                        placeholder="Enter your email or the company's email"
                     />
                 </Form.Group>
 

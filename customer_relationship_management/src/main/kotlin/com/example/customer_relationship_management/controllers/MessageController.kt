@@ -92,14 +92,12 @@ class MessageController(private val messageService: MessageService,private val c
     fun changeState(@RequestBody dto: HistoryDTO, @PathVariable messageId: Long) : ResponseEntity<Any>{
         val message = messageService.findById(messageId)
         val oldState = message.currentState
-        if (message.sender == "salvocabras@gmail.com"){
-            val emailDTO = SendEmailDTO(
-                recipient = message.sender,
-                subject = "State Change",
-                body = "The state of the message has been changed from $oldState to ${dto.state}"
-            )
-            messageService.notify(oldState,dto.state,emailDTO)
-        }
+        val emailDTO = SendEmailDTO(
+            recipient = message.sender,
+            subject = "State Change",
+            body = "The state of the message has been changed from $oldState to ${dto.state}"
+        )
+        messageService.notify(oldState,dto.state,emailDTO)
 
         val updatedMessage =messageService.changeState(dto.state,dto.comment,message)
 

@@ -388,7 +388,7 @@ export default function JobOfferPage({ jobOffer, onBack }: JobOfferPageProps) {
                           <ListGroup.Item key={pro.id}>
                             <Form.Check
                                 type="checkbox"
-                                label={`${pro.name} (${pro.skills.join(", ")})`}
+                                label={`${pro.name} ${pro.surname} (${pro.skills.join(", ")})`}
                                 checked={pro.id in selectedProfessionals}
                                 onChange={() => toggleProfessionalSelection(pro.id)}
                             />

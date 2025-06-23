@@ -16,9 +16,12 @@ import { SkillDTO } from "../../objects/Skill.ts";
 import JobOfferPage from "./JobOfferPage.tsx";
 import {listProfessionals} from "../../apis/apiProfessional.tsx";
 import {ProfessionalDTO} from "../../objects/Professional.ts";
+import {MeInterface} from "../../App.tsx";
 
-
-export default function ListJobOffers() {
+interface ListJobOfferProps {
+    me: MeInterface | null;
+}
+const ListJobOffers: React.FC<ListJobOfferProps> = ({ me }) => {
     const [jobOffers, setJobOffers] = useState<JobOffer[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -284,7 +287,7 @@ export default function ListJobOffers() {
                 <Col md={9}>
                     <div className="mb-4">
                         <h2>Job offers</h2>
-                        <Button className="btn-custom mt-2" onClick={() => setShowModal(true)} >Add new offer</Button>
+                        {me?.role!= "guest" && <Button className="btn-custom mt-2" onClick={() => setShowModal(true)} >Add new offer</Button>}
                     </div>
                     <Form.Group as={Row} className="mb-3">
                         <Form.Label column sm="4">Items per page:</Form.Label>
@@ -545,3 +548,4 @@ export default function ListJobOffers() {
         </Container>
     );
 }
+export default ListJobOffers;
